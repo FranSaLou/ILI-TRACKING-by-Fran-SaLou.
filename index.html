@@ -1,0 +1,2346 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Scraper Track" />
+  <meta name="description" content="SCRAPER TRACK by Fran SaLou — PWA móvil para seguimiento de pasaje de scrapers, volúmenes de líquido y gas, gráfico de velocidad en m/s e historial." />
+  <title>SCRAPER TRACK by Fran SaLou</title>
+
+  <!-- Fuente Inter y Tailwind CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    // Configuración de tema oscuro industrial para Tailwind CSS
+    try {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            },
+            colors: {
+              track: {
+                bg: '#090d16',
+                card: '#111827',
+                cardAlt: '#172033',
+                border: '#243149',
+                amber: '#f59e0b',
+                emerald: '#10b981',
+                sky: '#38bdf8',
+                rose: '#f43f5e',
+              },
+            },
+          },
+        },
+      };
+    } catch (_err) {
+      // Continuar incluso si tailwind.config falla en un entorno restringido
+    }
+  </script>
+
+  <style>
+    /* Estilos base adaptables a celular, números tabulares y barra inferior segura */
+    :root {
+      color-scheme: dark;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #090d16;
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+      min-height: 100dvh;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+    }
+
+    .app-main {
+      padding-bottom: calc(96px + var(--safe-bottom));
+    }
+
+    .bottom-nav {
+      padding-bottom: calc(8px + var(--safe-bottom));
+    }
+
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    input[type="time"],
+    input[type="number"],
+    input[type="text"],
+    select {
+      font-variant-numeric: tabular-nums;
+      min-height: 44px;
+    }
+
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.84) sepia(0.28) saturate(3.2) hue-rotate(355deg);
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body class="bg-track-bg text-slate-100 antialiased selection:bg-amber-400/30 selection:text-amber-200">
+  <!-- Contenedor principal de la aplicación (abre directo sin pantalla de presentación) -->
+  <div id="appShell" class="min-h-dvh flex flex-col">
+
+    <!-- Encabezado superior fijo con título, ícono SVG ILI/MFL y selector desplegable de PIG -->
+    <header class="sticky top-0 z-30 bg-track-bg/95 backdrop-blur-md border-b border-track-border">
+      <div class="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <!-- Ícono SVG de herramienta ILI / MFL -->
+            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-amber-400/20 via-amber-500/10 to-sky-500/15 border border-amber-400/40 flex items-center justify-center shrink-0 shadow-inner" aria-hidden="true">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Copas traseras de arrastre -->
+                <path d="M5 10.5C7.2 14.5 7.2 21.5 5 25.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                <path d="M8.5 11.5C10.5 15 10.5 21 8.5 24.5" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+                <!-- Cuerpo central de la herramienta ILI/MFL -->
+                <rect x="10.5" y="13.5" width="15" height="9" rx="4" fill="#111827" stroke="currentColor" stroke-width="2.2" />
+                <!-- Bandas de sensores magnéticos MFL -->
+                <line x1="14.5" y1="14" x2="14.5" y2="22" stroke="#fbbf24" stroke-width="2" />
+                <line x1="18" y1="14" x2="18" y2="22" stroke="#10b981" stroke-width="2" />
+                <line x1="21.5" y1="14" x2="21.5" y2="22" stroke="#38bdf8" stroke-width="2" />
+                <!-- Nariz guía frontal -->
+                <path d="M25.5 14.5C29 15 31 16.5 31 18C31 19.5 29 21 25.5 21.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+              </svg>
+            </div>
+
+            <!-- Título de la app -->
+            <div class="min-w-0">
+              <h1 class="text-sm sm:text-lg font-black tracking-tight text-white leading-tight truncate">
+                SCRAPER TRACK
+              </h1>
+              <div class="text-[10px] sm:text-[11px] text-amber-400 font-semibold leading-tight truncate">
+                by Fran SaLou
+              </div>
+              <p class="text-[11px] sm:text-xs text-slate-400 truncate mt-0.5">
+                Equipo activo: <span id="headerActivePigLabel" class="text-amber-300 font-semibold">MFL estándar</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Indicadores rápidos en el encabezado -->
+          <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div class="text-right bg-track-card border border-track-border rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5">
+              <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-bold">Avance</div>
+              <div id="headerProgress" class="text-xs sm:text-sm font-extrabold text-amber-400 tabular-nums">0.0%</div>
+            </div>
+            <div class="text-right bg-track-card border border-track-border rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5">
+              <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-bold">Vel. Med</div>
+              <div id="headerAvgVel" class="text-xs sm:text-sm font-extrabold text-emerald-400 tabular-nums">0.00 m/s</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fila dedicada para el selector desplegable de PIG y campo personalizado -->
+        <div class="flex flex-wrap items-center gap-2">
+          <label for="headerPigTypeSelect" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
+            Tipo de PIG:
+          </label>
+          <div class="relative flex-1 min-w-[190px] sm:max-w-xs">
+            <select
+              id="headerPigTypeSelect"
+              aria-label="Tipo de PIG corrido"
+              class="touch-target w-full appearance-none rounded-xl pl-3 pr-8 py-1.5 text-xs font-black tracking-wide bg-amber-400 hover:bg-amber-300 text-slate-950 border border-amber-300/80 shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-200 transition truncate"
+            >
+              <optgroup label="ILI / Inspección Inteligente">
+                <option value="MFL estándar" selected>MFL estándar</option>
+                <option value="MFL alta resolución (Axial/Circ.)">MFL alta resolución (Axial/Circ.)</option>
+                <option value="TFI">TFI</option>
+                <option value="UT / Ultrasonido">UT / Ultrasonido</option>
+                <option value="Combo MFL+Geo">Combo MFL+Geo</option>
+              </optgroup>
+              <optgroup label="Cleaner / Limpieza">
+                <option value="Cleaner Copas/Discos">Cleaner Copas/Discos</option>
+                <option value="Cleaner Cepillos/Brush">Cleaner Cepillos/Brush</option>
+                <option value="Cleaner Espuma/Foam">Cleaner Espuma/Foam</option>
+              </optgroup>
+              <optgroup label="Calibración / Geometría">
+                <option value="Placa calibradora">Placa calibradora</option>
+                <option value="Caliper / Geometría">Caliper / Geometría</option>
+              </optgroup>
+              <optgroup label="Separación / Desaguado">
+                <option value="Esfera">Esfera</option>
+                <option value="Cuchillas / Bidireccional">Cuchillas / Bidireccional</option>
+              </optgroup>
+              <optgroup label="Otro">
+                <option value="Personalizado / Otro">Personalizado / Otro</option>
+              </optgroup>
+            </select>
+            <svg class="w-4 h-4 text-slate-950 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </div>
+
+          <!-- Campo de texto adicional cuando se selecciona "Personalizado / Otro" -->
+          <input
+            id="headerCustomPigInput"
+            type="text"
+            maxlength="60"
+            placeholder="Especificar tipo de PIG..."
+            aria-label="Especificar tipo de PIG personalizado"
+            class="hidden min-h-[44px] flex-1 min-w-[160px] sm:max-w-xs rounded-xl px-3 py-1.5 text-xs font-bold bg-track-card border border-amber-400/70 text-amber-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-300"
+          />
+        </div>
+      </div>
+    </header>
+
+    <!-- Aviso no bloqueante en pantalla -->
+    <div id="toastBanner" role="status" aria-live="polite" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] pointer-events-none opacity-0 transition-all duration-200 -translate-y-2">
+      <div id="toastInner" class="rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xl border backdrop-blur-md flex items-center justify-between gap-2 bg-track-cardAlt border-amber-500/40 text-amber-200">
+        <span id="toastMessage">Listo</span>
+      </div>
+    </div>
+
+    <!-- Contenido principal con las 4 vistas -->
+    <main class="app-main flex-1 w-full max-w-5xl mx-auto px-3 sm:px-4 pt-4">
+
+      <!-- ================================================================= -->
+      <!-- VISTA 1: CARRERA                                                  -->
+      <!-- ================================================================= -->
+      <section id="tab-carrera" class="tab-panel space-y-4">
+        <!-- Configuración de tramo/km totales, paso entre PKs en metros y lanzamiento -->
+        <div class="bg-track-card border border-track-border rounded-2xl p-3.5 sm:p-4 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm sm:text-base font-extrabold text-white">Seguimiento de Carrera</h2>
+              <p class="text-xs text-slate-400">Configurá lanzamiento, kilómetros totales, paso en metros y cargá horas por PK.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                id="btnClearPasses"
+                type="button"
+                class="touch-target px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/35 text-xs font-bold text-rose-300 transition active:scale-95"
+              >
+                Limpiar PKs
+              </button>
+              <button
+                id="btnSaveQuickRun"
+                type="button"
+                class="touch-target px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition active:scale-95"
+              >
+                Guardar corrida
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Hora de lanzamiento -->
+            <div>
+              <label for="inputLaunchTime" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Hora de lanzamiento
+              </label>
+              <div class="flex items-center gap-1.5">
+                <input
+                  id="inputLaunchTime"
+                  type="time"
+                  step="1"
+                  class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums"
+                />
+                <button
+                  id="btnNowLaunch"
+                  type="button"
+                  class="touch-target px-3 rounded-xl bg-track-cardAlt hover:bg-slate-700/80 border border-track-border text-xs font-bold text-slate-200 transition active:scale-95"
+                >
+                  Ahora
+                </button>
+              </div>
+            </div>
+
+            <!-- Kilómetros totales -->
+            <div>
+              <label for="inputKmCarrera" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Kilómetros totales (km)
+              </label>
+              <input
+                id="inputKmCarrera"
+                type="number"
+                step="0.1"
+                min="0.1"
+                class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-sky-300 tabular-nums"
+              />
+            </div>
+
+            <!-- Paso entre PK/tramos en metros -->
+            <div>
+              <label for="inputStepCarrera" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Paso entre PK (metros)
+              </label>
+              <input
+                id="inputStepCarrera"
+                type="number"
+                step="50"
+                min="50"
+                class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-emerald-300 tabular-nums"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs calculados en vivo -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+          <div class="bg-track-card border border-track-border rounded-2xl p-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Media tiempo</div>
+            <div id="kpiMediaTiempo" class="mt-1 text-base sm:text-lg font-extrabold text-amber-300 tabular-nums">--:--</div>
+          </div>
+
+          <div class="bg-track-card border border-track-border rounded-2xl p-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Media vel</div>
+            <div id="kpiMediaVel" class="mt-1 text-base sm:text-lg font-extrabold text-emerald-400 tabular-nums">0.00 m/s</div>
+          </div>
+
+          <div class="bg-track-card border border-track-border rounded-2xl p-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tiempo total est.</div>
+            <div id="kpiTiempoCarrera" class="mt-1 text-base sm:text-lg font-extrabold text-white tabular-nums">--:--</div>
+          </div>
+
+          <div class="bg-track-card border border-track-border rounded-2xl p-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">% Carrera</div>
+            <div id="kpiPctCarrera" class="mt-1 text-base sm:text-lg font-extrabold text-sky-400 tabular-nums">0.0%</div>
+          </div>
+
+          <div class="bg-track-card border border-track-border rounded-2xl p-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Duración prom.</div>
+            <div id="kpiDuracionProm" class="mt-1 text-base sm:text-lg font-extrabold text-amber-400 tabular-nums">--:--</div>
+          </div>
+
+          <div class="bg-track-card border border-track-border rounded-2xl p-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Restante</div>
+            <div id="kpiRestante" class="mt-1 text-base sm:text-lg font-extrabold text-rose-300 tabular-nums">--:--</div>
+          </div>
+
+          <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-track-card to-track-cardAlt border border-amber-500/40 rounded-2xl p-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-amber-300">Llegada est.</div>
+            <div id="kpiHoraLlegada" class="mt-1 text-base sm:text-lg font-extrabold text-emerald-400 tabular-nums">--:--</div>
+          </div>
+        </div>
+
+        <!-- Barra de avance -->
+        <div class="bg-track-card border border-track-border rounded-2xl px-4 py-2.5 flex items-center gap-3">
+          <span class="text-xs font-bold text-slate-300 shrink-0 tabular-nums">Progreso</span>
+          <div class="flex-1 h-2.5 rounded-full bg-slate-800 overflow-hidden">
+            <div id="carreraProgressBar" class="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-emerald-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+          <span id="carreraProgressText" class="text-xs font-extrabold text-amber-400 shrink-0 tabular-nums">0.0%</span>
+        </div>
+
+        <!-- Lista / tabla de pasaje por PK -->
+        <div class="bg-track-card border border-track-border rounded-2xl overflow-hidden">
+          <div class="px-4 py-3 border-b border-track-border flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-extrabold text-white">Registro de Pasaje por PK</h2>
+              <p class="text-xs text-slate-400">Diferencia (`Dif`), tiempo estimado (`T/est`), tiempo acumulado (`T/A`) y velocidad (`Vel m/s`).</p>
+            </div>
+            <span id="pkCountLabel" class="text-xs font-bold text-amber-400 tabular-nums">0 PKs</span>
+          </div>
+
+          <div class="hidden md:grid md:grid-cols-12 gap-2 px-4 py-2.5 bg-track-cardAlt/80 border-b border-track-border text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <div class="col-span-1">PK</div>
+            <div class="col-span-2">Distancia</div>
+            <div class="col-span-3">Hora Pasaje</div>
+            <div class="col-span-1 text-right">Dif</div>
+            <div class="col-span-1 text-right">T/est</div>
+            <div class="col-span-2 text-right">T/A</div>
+            <div class="col-span-2 text-right">Vel m/s</div>
+          </div>
+
+          <div id="passRowsContainer" class="divide-y divide-track-border/70"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VISTA 2: VOLÚMENES                                                -->
+      <!-- ================================================================= -->
+      <section id="tab-volumenes" class="tab-panel hidden space-y-4">
+        <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between border-b border-track-border pb-3">
+            <div>
+              <h2 class="text-sm sm:text-base font-extrabold text-white">Parámetros de Ducto, Líquido y Gas</h2>
+              <p class="text-xs text-slate-400">Diámetro nominal de 4" a 36", espesor, caudales, presión, hora actual y margen de error.</p>
+            </div>
+            <button
+              id="btnResetVolParams"
+              type="button"
+              class="touch-target px-3 py-1.5 rounded-xl bg-track-cardAlt hover:bg-slate-700 border border-track-border text-xs font-bold text-amber-300 transition active:scale-95"
+            >
+              Base
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            <!-- Diámetro nominal en pulgadas (4" a 36") -->
+            <div>
+              <label for="paramInch" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Diámetro (")
+              </label>
+              <select id="paramInch" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums">
+                <option value="4">4"</option>
+                <option value="6">6"</option>
+                <option value="8" selected>8"</option>
+                <option value="10">10"</option>
+                <option value="12">12"</option>
+                <option value="14">14"</option>
+                <option value="16">16"</option>
+                <option value="18">18"</option>
+                <option value="20">20"</option>
+                <option value="22">22"</option>
+                <option value="24">24"</option>
+                <option value="26">26"</option>
+                <option value="28">28"</option>
+                <option value="30">30"</option>
+                <option value="32">32"</option>
+                <option value="34">34"</option>
+                <option value="36">36"</option>
+              </select>
+            </div>
+
+            <!-- Diámetro exterior en mm -->
+            <div>
+              <label for="paramODmm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Ø Exterior (mm)
+              </label>
+              <input id="paramODmm" type="number" step="0.005" min="10" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
+            </div>
+
+            <!-- Espesor en mm -->
+            <div>
+              <label for="paramWallMm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Espesor (mm)
+              </label>
+              <input id="paramWallMm" type="number" step="0.1" min="0.5" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
+            </div>
+
+            <!-- Caudal de bombeo de líquido en m3/h -->
+            <div>
+              <label for="paramLiquidM3h" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Bombeo líquido (m³/h)
+              </label>
+              <input id="paramLiquidM3h" type="number" step="1" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-sky-300 tabular-nums" />
+            </div>
+
+            <!-- Caudal de gas en m3/día -->
+            <div>
+              <label for="paramGasDay" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Caudal gas (m³/día)
+              </label>
+              <input id="paramGasDay" type="number" step="1000" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-emerald-300 tabular-nums" />
+            </div>
+
+            <!-- Presión -->
+            <div>
+              <label for="paramPressure" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Presión (bar)
+              </label>
+              <input id="paramPressure" type="number" step="0.5" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
+            </div>
+
+            <!-- Hora actual -->
+            <div>
+              <label for="paramCurrentTime" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Hora actual
+              </label>
+              <div class="flex items-center gap-1.5">
+                <input id="paramCurrentTime" type="time" step="1" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-2.5 py-2 text-sm font-bold text-amber-300 tabular-nums" />
+                <button id="btnSyncNowVol" type="button" class="touch-target px-2.5 rounded-xl bg-track-cardAlt border border-track-border text-xs font-bold text-slate-200 hover:bg-slate-700">
+                  Ahora
+                </button>
+              </div>
+            </div>
+
+            <!-- Margen de error en km -->
+            <div>
+              <label for="paramErrorKm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                Margen error (± km)
+              </label>
+              <input id="paramErrorKm" type="number" step="0.1" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultados de Líquido y Gas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Tarjeta Líquido -->
+          <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-extrabold text-sky-400 uppercase tracking-wider">Cálculo Líquido</h3>
+              <span id="volInnerDiam" class="text-xs font-bold text-slate-300 tabular-nums">Ø int: 0.0000 m</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Capacidad Total</div>
+                <div id="resTotalCapM3" class="text-base sm:text-lg font-extrabold text-white tabular-nums mt-0.5">0.00 m³</div>
+              </div>
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Capacidad por km</div>
+                <div id="resCapPerKm" class="text-base sm:text-lg font-extrabold text-sky-300 tabular-nums mt-0.5">0.00 m³/km</div>
+              </div>
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Horas Transcurridas</div>
+                <div id="resElapsedHours" class="text-base sm:text-lg font-extrabold text-amber-300 tabular-nums mt-0.5">0.00 h</div>
+              </div>
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Volumen Transportado</div>
+                <div id="resTransportedM3" class="text-base sm:text-lg font-extrabold text-emerald-400 tabular-nums mt-0.5">0.00 m³</div>
+              </div>
+            </div>
+
+            <div class="bg-track-cardAlt border border-amber-500/30 rounded-xl p-3 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-300 font-semibold">Posición aprox. scraper:</span>
+                <span id="resApproxKm" class="text-sm font-extrabold text-amber-400 tabular-nums">0.00 km</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Rango con margen (± km):</span>
+                <span id="resErrorRangeKm" class="font-bold text-slate-200 tabular-nums">0.00 km – 0.00 km</span>
+              </div>
+              <div class="flex items-center justify-between pt-1 border-t border-track-border/70">
+                <span class="text-slate-400">Horas de bombeo línea:</span>
+                <span id="resPumpHours" class="font-bold text-amber-300 tabular-nums">0.00 h</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Vel. hidráulica (km/h · m/s):</span>
+                <span id="resHydMetrics" class="font-bold text-sky-300 tabular-nums">0.00 km/h · 0.00 m/s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tarjeta Gas -->
+          <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-extrabold text-emerald-400 uppercase tracking-wider">Cálculo Gas</h3>
+              <span id="resGasM3hBadge" class="text-xs font-bold text-emerald-300 tabular-nums">0 m³/h</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Caudal Horario</div>
+                <div id="resGasM3h" class="text-base sm:text-lg font-extrabold text-white tabular-nums mt-0.5">0.0 m³/h</div>
+              </div>
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Velocidad Gas</div>
+                <div id="resGasVelMs" class="text-base sm:text-lg font-extrabold text-emerald-400 tabular-nums mt-0.5">0.00 m/s</div>
+              </div>
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Vol. Ajustado Presión</div>
+                <div id="resGasPressAdjM3" class="text-base sm:text-lg font-extrabold text-sky-300 tabular-nums mt-0.5">0 m³</div>
+              </div>
+              <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
+                <div class="text-[11px] text-slate-400">Tiempo Recorrido Gas</div>
+                <div id="resGasPumpTime" class="text-base sm:text-lg font-extrabold text-amber-400 tabular-nums mt-0.5">--:--</div>
+              </div>
+            </div>
+
+            <div class="bg-track-cardAlt border border-emerald-500/25 rounded-xl p-3 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-300 font-semibold">Volumen gas acumulado:</span>
+                <span id="resGasTranspM3" class="font-bold text-white tabular-nums">0 m³</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Área interna del ducto:</span>
+                <span id="resInnerAreaM2" class="font-bold text-slate-200 tabular-nums">0.0000 m²</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Presión operativa:</span>
+                <span id="resPressureEcho" class="font-bold text-emerald-300 tabular-nums">84 bar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VISTA 3: GRÁFICO                                                  -->
+      <!-- ================================================================= -->
+      <section id="tab-grafico" class="tab-panel hidden space-y-4">
+        <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-track-border pb-3">
+            <div>
+              <h2 class="text-sm sm:text-base font-extrabold text-white">
+                Progresión Punto a Punto de Velocidad (m/s)
+              </h2>
+              <p class="text-xs text-slate-400">
+                Tocá o hacé clic en cada punto para ver velocidad, `Δ m/s` y variación `%`.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                id="btnToggleAvgLine"
+                type="button"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-500/60 bg-amber-500/20 text-amber-300 transition"
+              >
+                Vel. Promedio
+              </button>
+              <button
+                id="btnToggleHydLine"
+                type="button"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold border border-sky-500/60 bg-sky-500/20 text-sky-300 transition"
+              >
+                Ref. Líquido
+              </button>
+            </div>
+          </div>
+
+          <!-- Inspección del punto seleccionado -->
+          <div id="chartPointInspector" class="bg-track-cardAlt border border-amber-500/35 rounded-2xl p-3.5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Tramo</div>
+              <div id="inspSegmentLabel" class="text-sm sm:text-base font-extrabold text-white mt-0.5 tabular-nums">—</div>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Velocidad</div>
+              <div id="inspVelValue" class="text-sm sm:text-base font-extrabold text-amber-400 mt-0.5 tabular-nums">0.00 m/s</div>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Variación (Δ m/s)</div>
+              <div id="inspDeltaMs" class="text-sm sm:text-base font-extrabold text-emerald-400 mt-0.5 tabular-nums">—</div>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Variación (%)</div>
+              <div id="inspDeltaPct" class="text-sm sm:text-base font-extrabold text-sky-300 mt-0.5 tabular-nums">—</div>
+            </div>
+          </div>
+
+          <!-- Lienzo SVG interactivo -->
+          <div class="w-full bg-track-bg border border-track-border/90 rounded-2xl p-2 sm:p-3 overflow-hidden">
+            <svg
+              id="velocityChartSvg"
+              viewBox="0 0 680 310"
+              class="w-full h-64 sm:h-72 select-none touch-manipulation"
+              role="img"
+              aria-label="Gráfico interactivo de velocidad en metros por segundo punto a punto"
+            ></svg>
+          </div>
+
+          <!-- Tabla resumen de tramos -->
+          <div class="border border-track-border rounded-2xl overflow-hidden">
+            <div class="px-3.5 py-2.5 bg-track-cardAlt/80 border-b border-track-border flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Tramos Registrados</span>
+              <span id="chartPointCount" class="text-xs font-bold text-amber-400 tabular-nums">0 puntos</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs tabular-nums">
+                <thead>
+                  <tr class="border-b border-track-border text-[11px] uppercase text-slate-400 bg-track-bg/60">
+                    <th class="py-2 px-3">Tramo</th>
+                    <th class="py-2 px-3 text-right">Dif</th>
+                    <th class="py-2 px-3 text-right">Vel (m/s)</th>
+                    <th class="py-2 px-3 text-right">Δ m/s</th>
+                    <th class="py-2 px-3 text-right">Var. %</th>
+                  </tr>
+                </thead>
+                <tbody id="chartPointTableBody" class="divide-y divide-track-border/60"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VISTA 4: HISTORIAL                                                -->
+      <!-- ================================================================= -->
+      <section id="tab-historial" class="tab-panel hidden space-y-4">
+        <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm sm:text-base font-extrabold text-white">Historial y Exportación</h2>
+              <p class="text-xs text-slate-400">Guardá corridas, cargalas o borralas, reiniciá la corrida y exportá resumen, CSV o JSON.</p>
+            </div>
+            <span id="storageModeBadge" class="self-start sm:self-auto text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              Almacenamiento local
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label for="inputRunName" class="sr-only">Nombre de la corrida</label>
+              <input
+                id="inputRunName"
+                type="text"
+                placeholder="Nombre de la corrida (opcional)"
+                class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm text-white"
+              />
+            </div>
+            <button
+              id="btnSaveRunToHistory"
+              type="button"
+              class="touch-target w-full rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm px-4 py-2 transition active:scale-95"
+            >
+              Guardar corrida
+            </button>
+            <button
+              id="btnResetAllDefaults"
+              type="button"
+              class="touch-target w-full rounded-xl bg-track-cardAlt hover:bg-rose-500/20 border border-track-border hover:border-rose-500/40 text-slate-200 hover:text-rose-200 font-bold text-xs sm:text-sm px-4 py-2 transition active:scale-95"
+            >
+              Reiniciar corrida
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button
+              id="btnCopySummary"
+              type="button"
+              class="touch-target flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-track-cardAlt hover:bg-slate-700 border border-track-border text-xs font-bold text-amber-300 transition active:scale-95"
+            >
+              Copiar resumen / WhatsApp
+            </button>
+            <button
+              id="btnExportCsv"
+              type="button"
+              class="touch-target flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-track-cardAlt hover:bg-slate-700 border border-track-border text-xs font-bold text-emerald-300 transition active:scale-95"
+            >
+              Exportar CSV
+            </button>
+            <button
+              id="btnExportJson"
+              type="button"
+              class="touch-target flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-track-cardAlt hover:bg-slate-700 border border-track-border text-xs font-bold text-sky-300 transition active:scale-95"
+            >
+              Exportar JSON
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-extrabold text-white">Corridas Guardadas</h3>
+            <span id="savedRunsCount" class="text-xs font-bold text-slate-400 tabular-nums">0 corridas</span>
+          </div>
+          <div id="savedRunsList" class="space-y-2.5"></div>
+        </div>
+
+        <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Vista Previa de Resumen</h3>
+          <pre id="reportPreviewText" class="bg-track-bg border border-track-border rounded-xl p-3 text-xs text-slate-200 overflow-x-auto whitespace-pre-wrap tabular-nums leading-relaxed"></pre>
+        </div>
+      </section>
+    </main>
+
+    <!-- Barra inferior con las 4 vistas -->
+    <nav aria-label="Navegación principal" class="bottom-nav fixed bottom-0 inset-x-0 z-40 bg-track-card/95 backdrop-blur-md border-t border-track-border">
+      <div class="max-w-5xl mx-auto grid grid-cols-4 gap-1 px-2 pt-1.5">
+        <button
+          type="button"
+          data-tab="carrera"
+          class="nav-tab-btn touch-target flex flex-col items-center justify-center rounded-xl py-1.5 text-amber-400 bg-amber-500/12 font-bold transition"
+        >
+          <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          </svg>
+          <span class="text-[11px] leading-tight">Carrera</span>
+        </button>
+
+        <button
+          type="button"
+          data-tab="volumenes"
+          class="nav-tab-btn touch-target flex flex-col items-center justify-center rounded-xl py-1.5 text-slate-400 hover:text-slate-200 font-semibold transition"
+        >
+          <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v18" />
+            <path d="M5 8h14" />
+            <rect x="6" y="11" width="12" height="7" rx="2" />
+          </svg>
+          <span class="text-[11px] leading-tight">Volúmenes</span>
+        </button>
+
+        <button
+          type="button"
+          data-tab="grafico"
+          class="nav-tab-btn touch-target flex flex-col items-center justify-center rounded-xl py-1.5 text-slate-400 hover:text-slate-200 font-semibold transition"
+        >
+          <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18" />
+            <path d="m7 14 4-4 3 3 6-6" />
+          </svg>
+          <span class="text-[11px] leading-tight">Gráfico</span>
+        </button>
+
+        <button
+          type="button"
+          data-tab="historial"
+          class="nav-tab-btn touch-target flex flex-col items-center justify-center rounded-xl py-1.5 text-slate-400 hover:text-slate-200 font-semibold transition"
+        >
+          <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 8v4l3 3" />
+            <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" />
+          </svg>
+          <span class="text-[11px] leading-tight">Historial</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =====================================================================
+      // 1. TABLA DE DIÁMETROS EXTERIORES ESTÁNDAR (4" a 36" -> mm)
+      // =====================================================================
+      const INCH_TO_OD_MM = {
+        4: 114.3,
+        6: 168.275,
+        8: 219.075,
+        10: 273.05,
+        12: 323.85,
+        14: 355.6,
+        16: 406.4,
+        18: 457.2,
+        20: 508,
+        22: 558.8,
+        24: 609.6,
+        26: 660.4,
+        28: 711.2,
+        30: 762,
+        32: 812.8,
+        34: 863.6,
+        36: 914.1,
+      };
+
+      const MARKET_PIG_TYPES = [
+        'MFL estándar',
+        'MFL alta resolución (Axial/Circ.)',
+        'TFI',
+        'UT / Ultrasonido',
+        'Combo MFL+Geo',
+        'Cleaner Copas/Discos',
+        'Cleaner Cepillos/Brush',
+        'Cleaner Espuma/Foam',
+        'Placa calibradora',
+        'Caliper / Geometría',
+        'Esfera',
+        'Cuchillas / Bidireccional',
+        'Personalizado / Otro',
+      ];
+
+      const STORAGE_KEY_STATE = 'scraper_track_fran_salou_state_v1';
+      const STORAGE_KEY_HISTORY = 'scraper_track_fran_salou_history_v1';
+
+      // Respaldo seguro en memoria cuando localStorage está restringido o lanza excepción
+      const memoryStore = new Map();
+      let usingMemoryFallback = false;
+
+      function readStorageSafe(key) {
+        try {
+          if (window && window.localStorage) {
+            return window.localStorage.getItem(key);
+          }
+        } catch (_err) {
+          usingMemoryFallback = true;
+        }
+        return memoryStore.has(key) ? memoryStore.get(key) : null;
+      }
+
+      function writeStorageSafe(key, value) {
+        try {
+          if (window && window.localStorage) {
+            window.localStorage.setItem(key, value);
+            return true;
+          }
+        } catch (_err) {
+          usingMemoryFallback = true;
+        }
+        memoryStore.set(key, value);
+        return false;
+      }
+
+      // =====================================================================
+      // 2. ESTADO INICIAL POR DEFECTO
+      // =====================================================================
+      function createDefaultState() {
+        return {
+          activeTab: 'carrera',
+          pigType: 'MFL estándar',
+          customPigType: '',
+          launchTime: '06:37',
+          kmTotal: 15.6,
+          stepMeters: 1000,
+          inchNominal: 8,
+          odMm: 219.075,
+          wallMm: 6.4,
+          liquidM3h: 64,
+          gasDay: 900000,
+          pressure: 84,
+          currentTime: '09:10',
+          errorKm: 1.5,
+          pkTimes: {
+            1: '07:12',
+            2: '07:45',
+            3: '08:19',
+            4: '08:52',
+          },
+          chartShowAvg: true,
+          chartShowHyd: true,
+          selectedSegmentIndex: null,
+        };
+      }
+
+      let appState = createDefaultState();
+      let savedRuns = [];
+      let toastTimer = null;
+
+      function getEffectivePigType(stateObj = appState) {
+        try {
+          if (!stateObj) return 'MFL estándar';
+          if (stateObj.pigType === 'Personalizado / Otro') {
+            const custom = String(stateObj.customPigType || '').trim();
+            return custom || 'Personalizado / Otro';
+          }
+          return stateObj.pigType || 'MFL estándar';
+        } catch (_err) {
+          return 'MFL estándar';
+        }
+      }
+
+      function showToast(message, tone = 'info') {
+        try {
+          const banner = document.getElementById('toastBanner');
+          const inner = document.getElementById('toastInner');
+          const msgEl = document.getElementById('toastMessage');
+          if (!banner || !inner || !msgEl) return;
+
+          msgEl.textContent = String(message || '');
+          inner.className =
+            'rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xl border backdrop-blur-md flex items-center justify-between gap-2 ' +
+            (tone === 'success'
+              ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+              : tone === 'warn'
+              ? 'bg-amber-950/90 border-amber-500/50 text-amber-200'
+              : 'bg-track-cardAlt/95 border-sky-500/40 text-sky-100');
+
+          banner.classList.remove('opacity-0', '-translate-y-2');
+          banner.classList.add('opacity-100', 'translate-y-0');
+
+          if (toastTimer) clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => {
+            banner.classList.remove('opacity-100', 'translate-y-0');
+            banner.classList.add('opacity-0', '-translate-y-2');
+          }, 2200);
+        } catch (_err) {
+          // Ignorar errores visuales
+        }
+      }
+
+      // =====================================================================
+      // 3. UTILIDADES DE HORA Y DIFERENCIA SEGURA ANTE CRUCE DE MEDIANOCHE
+      // =====================================================================
+      function parseTimeToSeconds(timeStr) {
+        try {
+          if (!timeStr || typeof timeStr !== 'string') return null;
+          const parts = timeStr.trim().split(':');
+          if (parts.length < 2 || parts.length > 3) return null;
+
+          const h = Number(parts[0]);
+          const m = Number(parts[1]);
+          const s = parts.length === 3 ? Number(parts[2]) : 0;
+
+          if (
+            !Number.isFinite(h) || !Number.isFinite(m) || !Number.isFinite(s) ||
+            h < 0 || h > 23 || m < 0 || m > 59 || s < 0 || s > 59
+          ) {
+            return null;
+          }
+          return Math.round(h * 3600 + m * 60 + s);
+        } catch (_err) {
+          return null;
+        }
+      }
+
+      function getNowTimeString() {
+        try {
+          const now = new Date();
+          return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        } catch (_err) {
+          return '00:00';
+        }
+      }
+
+      function diffSecondsMidnightSafe(prevSec, currSec) {
+        if (prevSec === null || currSec === null) return null;
+        let diff = currSec - prevSec;
+        if (diff < 0) diff += 86400;
+        return diff;
+      }
+
+      function formatDuration(totalSeconds) {
+        if (totalSeconds === null || totalSeconds === undefined || !Number.isFinite(totalSeconds) || totalSeconds < 0) {
+          return '--:--';
+        }
+        const rounded = Math.round(totalSeconds);
+        const h = Math.floor(rounded / 3600);
+        const m = Math.floor((rounded % 3600) / 60);
+        const s = rounded % 60;
+        const pad = (n) => String(n).padStart(2, '0');
+        return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+      }
+
+      function formatClockFromSeconds(secOfDay) {
+        if (secOfDay === null || secOfDay === undefined || !Number.isFinite(secOfDay)) {
+          return '--:--';
+        }
+        const wrapped = ((Math.round(secOfDay) % 86400) + 86400) % 86400;
+        const h = Math.floor(wrapped / 3600);
+        const m = Math.floor((wrapped % 3600) / 60);
+        const s = wrapped % 60;
+        const pad = (n) => String(n).padStart(2, '0');
+        return s > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}`;
+      }
+
+      // =====================================================================
+      // 4. CÁLCULOS EN TIEMPO REAL DE CARRERA, LÍQUIDO Y GAS
+      // =====================================================================
+      function computeMetrics() {
+        try {
+          const kmTotal = Math.max(0.1, Number(appState.kmTotal) || 15.6);
+          const stepMeters = Math.max(1, Number(appState.stepMeters) || 1000);
+          const totalMeters = kmTotal * 1000;
+          const totalPkCount = Math.max(1, Math.ceil(totalMeters / stepMeters));
+
+          const launchSec = parseTimeToSeconds(appState.launchTime);
+          const rows = [];
+
+          rows.push({
+            pk: 0,
+            label: 'Lanz',
+            distanceM: 0,
+            distanceKm: 0,
+            timeStr: appState.launchTime || '',
+            timeSec: launchSec,
+            difSec: null,
+            tEstSec: null,
+            tCumSec: 0,
+            velMs: null,
+            isRegistered: launchSec !== null,
+          });
+
+          let prevSec = launchSec;
+          let lastPk = 0;
+          let lastTimeSec = launchSec;
+          let cumElapsedSec = 0;
+
+          const difSamples = [];
+          const velSamples = [];
+          const segments = [];
+
+          for (let pk = 1; pk <= totalPkCount; pk++) {
+            const prevDistM = (pk - 1) * stepMeters;
+            const distM = Math.min(totalMeters, pk * stepMeters);
+            const segDistM = Math.max(1, distM - prevDistM);
+            const distKm = distM / 1000;
+
+            const rawTime = appState.pkTimes && appState.pkTimes[pk] ? appState.pkTimes[pk] : '';
+            const timeSec = parseTimeToSeconds(rawTime);
+
+            let difSec = null;
+            let velMs = null;
+
+            if (timeSec !== null && prevSec !== null) {
+              const d = diffSecondsMidnightSafe(prevSec, timeSec);
+              if (d !== null && d > 0) {
+                difSec = d;
+                cumElapsedSec += d;
+                velMs = segDistM / d;
+                difSamples.push(d);
+                velSamples.push(velMs);
+
+                const fromLabel = lastPk === 0 ? 'Lanz' : `PK ${lastPk}`;
+                const toLabel = `PK ${pk}`;
+                segments.push({
+                  index: segments.length,
+                  fromPk: lastPk,
+                  toPk: pk,
+                  label: `${fromLabel} → ${toLabel}`,
+                  shortLabel: `PK${pk}`,
+                  difSec: d,
+                  velMs,
+                });
+              }
+              prevSec = timeSec;
+              lastPk = pk;
+              lastTimeSec = timeSec;
+            } else if (timeSec !== null) {
+              prevSec = timeSec;
+              lastPk = pk;
+              lastTimeSec = timeSec;
+            }
+
+            rows.push({
+              pk,
+              label: `PK ${pk}`,
+              distanceM: distM,
+              distanceKm: distKm,
+              timeStr: rawTime,
+              timeSec,
+              difSec,
+              tEstSec: null,
+              tCumSec: timeSec !== null ? cumElapsedSec : null,
+              velMs,
+              isRegistered: timeSec !== null,
+            });
+          }
+
+          const avgDifSec =
+            difSamples.length > 0 ? difSamples.reduce((a, b) => a + b, 0) / difSamples.length : null;
+          const avgVelMs =
+            velSamples.length > 0 ? velSamples.reduce((a, b) => a + b, 0) / velSamples.length : null;
+
+          for (let i = 1; i < rows.length; i++) {
+            if (!rows[i].isRegistered && avgDifSec !== null) {
+              rows[i].tEstSec = avgDifSec;
+            }
+          }
+
+          const completedMeters = Math.min(totalMeters, lastPk * stepMeters);
+          const pctCarrera = totalMeters > 0 ? Math.min(100, Math.max(0, (completedMeters / totalMeters) * 100)) : 0;
+
+          const avgPkDurationSec = avgDifSec !== null ? avgDifSec : null;
+          const totalStepsEquivalent = totalMeters / stepMeters;
+          const tiempoCarreraSec = avgDifSec !== null ? avgDifSec * totalStepsEquivalent : null;
+
+          const remainingMeters = Math.max(0, totalMeters - completedMeters);
+          const remainingSec =
+            avgVelMs !== null && avgVelMs > 0
+              ? remainingMeters / avgVelMs
+              : avgDifSec !== null
+              ? (remainingMeters / stepMeters) * avgDifSec
+              : null;
+
+          let horaLlegadaSec = null;
+          if (lastTimeSec !== null && remainingSec !== null) {
+            horaLlegadaSec = lastTimeSec + remainingSec;
+          } else if (launchSec !== null && tiempoCarreraSec !== null) {
+            horaLlegadaSec = launchSec + tiempoCarreraSec;
+          }
+
+          // Cálculos geométricos y volumétricos de líquido
+          const odMm = Math.max(1, Number(appState.odMm) || 219.075);
+          const wallMm = Math.max(0, Number(appState.wallMm) || 0);
+          const dInM = Math.max(0.01, (odMm - 2 * wallMm) / 1000);
+          const innerAreaM2 = (Math.PI * dInM * dInM) / 4;
+
+          const totalCapM3 = innerAreaM2 * totalMeters;
+          const capPerKm = kmTotal > 0 ? totalCapM3 / kmTotal : 0;
+
+          const liquidM3h = Math.max(0, Number(appState.liquidM3h) || 0);
+          const pumpHours = liquidM3h > 0 ? totalCapM3 / liquidM3h : null;
+
+          const currentSec = parseTimeToSeconds(appState.currentTime);
+          const elapsedSinceLaunchSec =
+            launchSec !== null && currentSec !== null
+              ? diffSecondsMidnightSafe(launchSec, currentSec)
+              : null;
+          const elapsedHours = elapsedSinceLaunchSec !== null ? elapsedSinceLaunchSec / 3600 : 0;
+
+          const pumpedM3 = Math.min(totalCapM3, Math.max(0, liquidM3h * elapsedHours));
+          const approxKm = capPerKm > 0 ? Math.min(kmTotal, pumpedM3 / capPerKm) : 0;
+          const errorKm = Math.max(0, Number(appState.errorKm) || 0);
+          const minKm = Math.max(0, approxKm - errorKm);
+          const maxKm = Math.min(kmTotal, approxKm + errorKm);
+
+          const avgKmh = capPerKm > 0 ? liquidM3h / capPerKm : 0;
+          const hydVelMs = avgKmh / 3.6;
+
+          // Cálculos de gas
+          const gasDay = Math.max(0, Number(appState.gasDay) || 0);
+          const pressure = Math.max(0, Number(appState.pressure) || 0);
+          const gasM3h = gasDay / 24;
+          const gasM3s = gasM3h / 3600;
+          const gasVelMs = innerAreaM2 > 0 ? gasM3s / innerAreaM2 : 0;
+          const gasTranspM3 = gasM3h * elapsedHours;
+          const pressureFactor = Math.max(1, (pressure + 1.01325) / 1.01325);
+          const gasPressAdjM3 = gasTranspM3 / pressureFactor;
+          const gasPumpTimeSec = gasVelMs > 0 ? totalMeters / gasVelMs : null;
+
+          return {
+            kmTotal,
+            stepMeters,
+            totalMeters,
+            totalPkCount,
+            rows,
+            segments,
+            avgDifSec,
+            avgVelMs,
+            pctCarrera,
+            avgPkDurationSec,
+            tiempoCarreraSec,
+            remainingSec,
+            horaLlegadaSec,
+            dInM,
+            innerAreaM2,
+            totalCapM3,
+            capPerKm,
+            liquidM3h,
+            pumpHours,
+            elapsedHours,
+            pumpedM3,
+            approxKm,
+            minKm,
+            maxKm,
+            avgKmh,
+            hydVelMs,
+            gasDay,
+            pressure,
+            gasM3h,
+            gasVelMs,
+            gasTranspM3,
+            gasPressAdjM3,
+            gasPumpTimeSec,
+          };
+        } catch (_err) {
+          return {
+            kmTotal: 15.6,
+            stepMeters: 1000,
+            totalMeters: 15600,
+            totalPkCount: 16,
+            rows: [],
+            segments: [],
+            avgDifSec: null,
+            avgVelMs: null,
+            pctCarrera: 0,
+            avgPkDurationSec: null,
+            tiempoCarreraSec: null,
+            remainingSec: null,
+            horaLlegadaSec: null,
+            dInM: 0.206275,
+            innerAreaM2: 0.0334,
+            totalCapM3: 521,
+            capPerKm: 33.4,
+            liquidM3h: 64,
+            pumpHours: 8.14,
+            elapsedHours: 0,
+            pumpedM3: 0,
+            approxKm: 0,
+            minKm: 0,
+            maxKm: 1.5,
+            avgKmh: 1.92,
+            hydVelMs: 0.53,
+            gasDay: 900000,
+            pressure: 84,
+            gasM3h: 37500,
+            gasVelMs: 0,
+            gasTranspM3: 0,
+            gasPressAdjM3: 0,
+            gasPumpTimeSec: null,
+          };
+        }
+      }
+
+      // =====================================================================
+      // 5. RENDERIZADO DE VISTAS
+      // =====================================================================
+      function switchTab(tabName) {
+        try {
+          const valid = ['carrera', 'volumenes', 'grafico', 'historial'];
+          const target = valid.includes(tabName) ? tabName : 'carrera';
+          appState.activeTab = target;
+          persistState();
+
+          document.querySelectorAll('.tab-panel').forEach((panel) => {
+            panel.classList.toggle('hidden', panel.id !== `tab-${target}`);
+          });
+
+          document.querySelectorAll('.nav-tab-btn').forEach((btn) => {
+            const active = btn.dataset.tab === target;
+            btn.classList.toggle('text-amber-400', active);
+            btn.classList.toggle('bg-amber-500/12', active);
+            btn.classList.toggle('font-bold', active);
+            btn.classList.toggle('text-slate-400', !active);
+            btn.classList.toggle('font-semibold', !active);
+          });
+
+          const m = computeMetrics();
+          if (target === 'grafico') {
+            renderChartView(m);
+          } else if (target === 'historial') {
+            renderHistoryView(m);
+          }
+        } catch (_err) {
+          // Evitar bloqueo ante errores de navegación
+        }
+      }
+
+      function renderHeaderAndCarrera(m) {
+        try {
+          const pigSelectEl = document.getElementById('headerPigTypeSelect');
+          const customPigInputEl = document.getElementById('headerCustomPigInput');
+          const activePigLabelEl = document.getElementById('headerActivePigLabel');
+
+          if (pigSelectEl && document.activeElement !== pigSelectEl) {
+            pigSelectEl.value = MARKET_PIG_TYPES.includes(appState.pigType) ? appState.pigType : 'MFL estándar';
+          }
+          if (customPigInputEl) {
+            const isCustom = appState.pigType === 'Personalizado / Otro';
+            customPigInputEl.classList.toggle('hidden', !isCustom);
+            if (document.activeElement !== customPigInputEl) {
+              customPigInputEl.value = appState.customPigType || '';
+            }
+          }
+          if (activePigLabelEl) {
+            activePigLabelEl.textContent = getEffectivePigType(appState);
+          }
+
+          document.getElementById('headerProgress').textContent = `${m.pctCarrera.toFixed(1)}%`;
+          document.getElementById('headerAvgVel').textContent =
+            m.avgVelMs !== null ? `${m.avgVelMs.toFixed(2)} m/s` : '0.00 m/s';
+
+          const launchEl = document.getElementById('inputLaunchTime');
+          if (launchEl && document.activeElement !== launchEl) {
+            launchEl.value = appState.launchTime || '';
+          }
+          const kmEl = document.getElementById('inputKmCarrera');
+          if (kmEl && document.activeElement !== kmEl) {
+            kmEl.value = appState.kmTotal;
+          }
+          const stepEl = document.getElementById('inputStepCarrera');
+          if (stepEl && document.activeElement !== stepEl) {
+            stepEl.value = appState.stepMeters;
+          }
+
+          document.getElementById('kpiMediaTiempo').textContent = formatDuration(m.avgDifSec);
+          document.getElementById('kpiMediaVel').textContent =
+            m.avgVelMs !== null ? `${m.avgVelMs.toFixed(2)} m/s` : '0.00 m/s';
+          document.getElementById('kpiTiempoCarrera').textContent = formatDuration(m.tiempoCarreraSec);
+          document.getElementById('kpiPctCarrera').textContent = `${m.pctCarrera.toFixed(1)}%`;
+          document.getElementById('kpiDuracionProm').textContent = formatDuration(m.avgPkDurationSec);
+          document.getElementById('kpiRestante').textContent = formatDuration(m.remainingSec);
+          document.getElementById('kpiHoraLlegada').textContent = formatClockFromSeconds(m.horaLlegadaSec);
+
+          document.getElementById('carreraProgressBar').style.width = `${m.pctCarrera.toFixed(1)}%`;
+          document.getElementById('carreraProgressText').textContent = `${m.pctCarrera.toFixed(1)}%`;
+          document.getElementById('pkCountLabel').textContent = `${m.totalPkCount} PKs`;
+
+          const container = document.getElementById('passRowsContainer');
+          if (!container) return;
+
+          const activeInput = document.activeElement;
+          const activePk =
+            activeInput && activeInput.classList && activeInput.classList.contains('pk-time-input')
+              ? activeInput.getAttribute('data-pk')
+              : null;
+
+          container.innerHTML = m.rows
+            .map((row) => {
+              const isLaunch = row.pk === 0;
+              const difDisplay = isLaunch ? '—' : formatDuration(row.difSec);
+              const tEstDisplay = isLaunch
+                ? '—'
+                : row.isRegistered
+                ? 'OK'
+                : formatDuration(row.tEstSec);
+              const tCumDisplay = formatDuration(row.tCumSec);
+              const velDisplay = isLaunch
+                ? '—'
+                : row.velMs !== null
+                ? `${row.velMs.toFixed(2)} m/s`
+                : '--';
+
+              const velColor =
+                !isLaunch && row.velMs !== null
+                  ? row.velMs >= 0.8
+                    ? 'text-emerald-400'
+                    : row.velMs >= 0.35
+                    ? 'text-amber-300'
+                    : 'text-sky-300'
+                  : 'text-slate-400';
+
+              return `
+                <div class="p-3 sm:px-4 sm:py-2.5 grid grid-cols-1 md:grid-cols-12 gap-2 md:items-center ${
+                  isLaunch ? 'bg-amber-500/8' : 'hover:bg-track-cardAlt/40'
+                }">
+                  <div class="flex items-center justify-between md:block md:col-span-1">
+                    <span class="text-xs sm:text-sm font-extrabold ${
+                      isLaunch ? 'text-amber-400' : 'text-white'
+                    }">${escapeHtml(row.label)}</span>
+                    <span class="md:hidden text-xs text-slate-400 tabular-nums">${(row.distanceM).toLocaleString('es-AR')} m (${row.distanceKm.toFixed(2)} km)</span>
+                  </div>
+
+                  <div class="hidden md:block md:col-span-2 text-xs text-slate-300 tabular-nums">
+                    ${row.distanceM.toLocaleString('es-AR')} m <span class="text-slate-500">(${row.distanceKm.toFixed(2)} km)</span>
+                  </div>
+
+                  <div class="md:col-span-3 flex items-center gap-1.5">
+                    <input
+                      type="time"
+                      step="1"
+                      data-pk="${row.pk}"
+                      value="${escapeHtml(row.timeStr || '')}"
+                      aria-label="Hora de ${escapeHtml(row.label)}"
+                      class="pk-time-input w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-2.5 py-1.5 text-xs sm:text-sm font-bold text-amber-200 tabular-nums"
+                    />
+                    <button
+                      type="button"
+                      data-now-pk="${row.pk}"
+                      class="pk-now-btn touch-target px-2.5 rounded-xl bg-track-cardAlt hover:bg-slate-700 border border-track-border text-[11px] font-bold text-slate-200 transition active:scale-95"
+                    >
+                      Ahora
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-4 gap-1.5 md:col-span-6 md:grid-cols-6 md:gap-2 items-center text-xs tabular-nums pt-1 md:pt-0 border-t border-track-border/40 md:border-0">
+                    <div class="md:col-span-1 md:text-right">
+                      <span class="block md:hidden text-[10px] text-slate-500">Dif</span>
+                      <span class="font-bold text-slate-200">${difDisplay}</span>
+                    </div>
+                    <div class="md:col-span-1 md:text-right">
+                      <span class="block md:hidden text-[10px] text-slate-500">T/est</span>
+                      <span class="font-semibold ${row.isRegistered ? 'text-emerald-400/80' : 'text-amber-300/90'}">${tEstDisplay}</span>
+                    </div>
+                    <div class="md:col-span-2 md:text-right">
+                      <span class="block md:hidden text-[10px] text-slate-500">T/A</span>
+                      <span class="font-bold text-sky-300">${tCumDisplay}</span>
+                    </div>
+                    <div class="md:col-span-2 md:text-right">
+                      <span class="block md:hidden text-[10px] text-slate-500">Vel m/s</span>
+                      <span class="font-extrabold ${velColor}">${velDisplay}</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+
+          if (activePk !== null) {
+            const restore = container.querySelector(`.pk-time-input[data-pk="${activePk}"]`);
+            if (restore && document.activeElement !== restore) {
+              restore.focus();
+            }
+          }
+        } catch (_err) {
+          // Evitar fallo si algún elemento no existe
+        }
+      }
+
+      function renderVolumenesView(m) {
+        try {
+          const setValIfIdle = (id, val) => {
+            const el = document.getElementById(id);
+            if (el && document.activeElement !== el) el.value = val;
+          };
+
+          setValIfIdle('paramInch', String(appState.inchNominal));
+          setValIfIdle('paramODmm', appState.odMm);
+          setValIfIdle('paramWallMm', appState.wallMm);
+          setValIfIdle('paramLiquidM3h', appState.liquidM3h);
+          setValIfIdle('paramGasDay', appState.gasDay);
+          setValIfIdle('paramPressure', appState.pressure);
+          setValIfIdle('paramCurrentTime', appState.currentTime);
+          setValIfIdle('paramErrorKm', appState.errorKm);
+
+          document.getElementById('volInnerDiam').textContent = `Ø int: ${m.dInM.toFixed(4)} m`;
+          document.getElementById('resTotalCapM3').textContent = `${m.totalCapM3.toFixed(2)} m³`;
+          document.getElementById('resCapPerKm').textContent = `${m.capPerKm.toFixed(2)} m³/km`;
+          document.getElementById('resElapsedHours').textContent = `${m.elapsedHours.toFixed(2)} h`;
+          document.getElementById('resTransportedM3').textContent = `${m.pumpedM3.toFixed(2)} m³`;
+          document.getElementById('resApproxKm').textContent = `${m.approxKm.toFixed(2)} km`;
+          document.getElementById('resErrorRangeKm').textContent =
+            `${m.minKm.toFixed(2)} km – ${m.maxKm.toFixed(2)} km`;
+          document.getElementById('resPumpHours').textContent =
+            m.pumpHours !== null ? `${m.pumpHours.toFixed(2)} h` : '—';
+          document.getElementById('resHydMetrics').textContent =
+            `${m.avgKmh.toFixed(2)} km/h · ${m.hydVelMs.toFixed(2)} m/s`;
+
+          document.getElementById('resGasM3hBadge').textContent = `${m.gasM3h.toFixed(1)} m³/h`;
+          document.getElementById('resGasM3h').textContent =
+            `${m.gasM3h.toLocaleString('es-AR', { maximumFractionDigits: 1 })} m³/h`;
+          document.getElementById('resGasVelMs').textContent = `${m.gasVelMs.toFixed(2)} m/s`;
+          document.getElementById('resGasPressAdjM3').textContent =
+            `${Math.round(m.gasPressAdjM3).toLocaleString('es-AR')} m³`;
+          document.getElementById('resGasPumpTime').textContent = formatDuration(m.gasPumpTimeSec);
+          document.getElementById('resGasTranspM3').textContent =
+            `${Math.round(m.gasTranspM3).toLocaleString('es-AR')} m³`;
+          document.getElementById('resInnerAreaM2').textContent = `${m.innerAreaM2.toFixed(4)} m²`;
+          document.getElementById('resPressureEcho').textContent = `${m.pressure} bar`;
+        } catch (_err) {
+          // Ignorar error de renderizado parcial
+        }
+      }
+
+      // =====================================================================
+      // 6. GRÁFICO SVG PUNTO A PUNTO DE VELOCIDAD (m/s)
+      // =====================================================================
+      function renderChartView(m) {
+        try {
+          const svg = document.getElementById('velocityChartSvg');
+          const tableBody = document.getElementById('chartPointTableBody');
+          const countBadge = document.getElementById('chartPointCount');
+          if (!svg || !tableBody) return;
+
+          const btnAvg = document.getElementById('btnToggleAvgLine');
+          const btnHyd = document.getElementById('btnToggleHydLine');
+          if (btnAvg) {
+            btnAvg.className = appState.chartShowAvg
+              ? 'px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-500/60 bg-amber-500/20 text-amber-300 transition'
+              : 'px-3 py-1.5 rounded-xl text-xs font-bold border border-track-border bg-track-bg text-slate-400 transition';
+          }
+          if (btnHyd) {
+            btnHyd.className = appState.chartShowHyd
+              ? 'px-3 py-1.5 rounded-xl text-xs font-bold border border-sky-500/60 bg-sky-500/20 text-sky-300 transition'
+              : 'px-3 py-1.5 rounded-xl text-xs font-bold border border-track-border bg-track-bg text-slate-400 transition';
+          }
+
+          const segments = m.segments || [];
+          if (countBadge) {
+            countBadge.textContent = `${segments.length} ${segments.length === 1 ? 'punto' : 'puntos'}`;
+          }
+
+          if (segments.length === 0) {
+            document.getElementById('inspSegmentLabel').textContent = 'Sin datos';
+            document.getElementById('inspVelValue').textContent = '0.00 m/s';
+            document.getElementById('inspDeltaMs').textContent = '—';
+            document.getElementById('inspDeltaPct').textContent = '—';
+
+            svg.innerHTML = `
+              <text x="340" y="155" text-anchor="middle" fill="#94a3b8" font-size="14" font-family="Inter, sans-serif">
+                Cargá horarios en Carrera para ver la progresión punto a punto en m/s.
+              </text>
+            `;
+            tableBody.innerHTML = `
+              <tr>
+                <td colspan="5" class="py-4 px-3 text-center text-slate-400">Sin tramos registrados todavía.</td>
+              </tr>
+            `;
+            return;
+          }
+
+          if (
+            appState.selectedSegmentIndex === null ||
+            appState.selectedSegmentIndex < 0 ||
+            appState.selectedSegmentIndex >= segments.length
+          ) {
+            appState.selectedSegmentIndex = segments.length - 1;
+          }
+
+          const selIdx = appState.selectedSegmentIndex;
+          const selSeg = segments[selIdx];
+          const prevSeg = selIdx > 0 ? segments[selIdx - 1] : null;
+
+          document.getElementById('inspSegmentLabel').textContent = selSeg.label;
+          document.getElementById('inspVelValue').textContent = `${selSeg.velMs.toFixed(2)} m/s`;
+
+          const deltaMsEl = document.getElementById('inspDeltaMs');
+          const deltaPctEl = document.getElementById('inspDeltaPct');
+          if (prevSeg && prevSeg.velMs > 0) {
+            const diff = selSeg.velMs - prevSeg.velMs;
+            const pct = (diff / prevSeg.velMs) * 100;
+            const sign = diff >= 0 ? '+' : '';
+            deltaMsEl.textContent = `${sign}${diff.toFixed(2)} m/s`;
+            deltaMsEl.className =
+              'text-sm sm:text-base font-extrabold mt-0.5 tabular-nums ' +
+              (diff >= 0 ? 'text-emerald-400' : 'text-rose-400');
+            deltaPctEl.textContent = `${sign}${pct.toFixed(1)}%`;
+          } else {
+            deltaMsEl.textContent = 'Inicial';
+            deltaMsEl.className = 'text-sm sm:text-base font-extrabold text-slate-300 mt-0.5 tabular-nums';
+            deltaPctEl.textContent = '—';
+          }
+
+          const vels = segments.map((s) => s.velMs);
+          const avgVel = vels.reduce((a, b) => a + b, 0) / vels.length;
+
+          const width = 680;
+          const height = 310;
+          const padLeft = 52;
+          const padRight = 24;
+          const padTop = 24;
+          const padBottom = 46;
+          const plotW = width - padLeft - padRight;
+          const plotH = height - padTop - padBottom;
+
+          const candidates = [...vels];
+          if (appState.chartShowAvg) candidates.push(avgVel);
+          if (appState.chartShowHyd && m.hydVelMs > 0) candidates.push(m.hydVelMs);
+
+          let yMin = Math.max(0, Math.floor((Math.min(...candidates) - 0.15) * 10) / 10);
+          let yMax = Math.ceil((Math.max(...candidates) + 0.15) * 10) / 10;
+          if (yMax - yMin < 0.4) yMax = yMin + 0.4;
+
+          const getX = (idx) =>
+            segments.length === 1 ? padLeft + plotW / 2 : padLeft + (idx / (segments.length - 1)) * plotW;
+          const getY = (val) => {
+            const ratio = (val - yMin) / (yMax - yMin);
+            return padTop + plotH - Math.max(0, Math.min(1, ratio)) * plotH;
+          };
+
+          const parts = [];
+          parts.push(`
+            <defs>
+              <linearGradient id="velAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.34" />
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.01" />
+              </linearGradient>
+            </defs>
+          `);
+
+          for (let t = 0; t <= 4; t++) {
+            const val = yMin + ((yMax - yMin) * t) / 4;
+            const yPos = getY(val);
+            parts.push(`
+              <line x1="${padLeft}" y1="${yPos.toFixed(1)}" x2="${width - padRight}" y2="${yPos.toFixed(1)}" stroke="#1e293b" stroke-width="1" stroke-dasharray="3 3" />
+              <text x="${padLeft - 8}" y="${(yPos + 4).toFixed(1)}" text-anchor="end" fill="#94a3b8" font-size="11" font-family="Inter, sans-serif">${val.toFixed(2)}</text>
+            `);
+          }
+
+          if (appState.chartShowAvg) {
+            const yAvg = getY(avgVel);
+            parts.push(`
+              <line x1="${padLeft}" y1="${yAvg.toFixed(1)}" x2="${width - padRight}" y2="${yAvg.toFixed(1)}" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.9" />
+              <text x="${width - padRight}" y="${(yAvg - 5).toFixed(1)}" text-anchor="end" fill="#fbbf24" font-size="10" font-weight="700" font-family="Inter, sans-serif">Prom. ${avgVel.toFixed(2)} m/s</text>
+            `);
+          }
+
+          if (appState.chartShowHyd && m.hydVelMs > 0) {
+            const yHyd = getY(m.hydVelMs);
+            parts.push(`
+              <line x1="${padLeft}" y1="${yHyd.toFixed(1)}" x2="${width - padRight}" y2="${yHyd.toFixed(1)}" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85" />
+              <text x="${padLeft + 6}" y="${(yHyd - 5).toFixed(1)}" text-anchor="start" fill="#7dd3fc" font-size="10" font-weight="700" font-family="Inter, sans-serif">Líquido ${m.hydVelMs.toFixed(2)} m/s</text>
+            `);
+          }
+
+          const coords = segments.map((s, idx) => ({
+            x: getX(idx),
+            y: getY(s.velMs),
+            seg: s,
+            idx,
+          }));
+
+          if (coords.length > 1) {
+            const linePts = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+            const areaPts = [
+              `${coords[0].x.toFixed(1)},${(padTop + plotH).toFixed(1)}`,
+              ...coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`),
+              `${coords[coords.length - 1].x.toFixed(1)},${(padTop + plotH).toFixed(1)}`,
+            ].join(' ');
+            parts.push(`<polygon points="${areaPts}" fill="url(#velAreaGrad)" />`);
+            parts.push(`<polyline points="${linePts}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />`);
+          }
+
+          coords.forEach((c) => {
+            const isSel = c.idx === selIdx;
+            parts.push(`
+              <text x="${c.x.toFixed(1)}" y="${height - padBottom + 18}" text-anchor="middle" fill="${isSel ? '#fbbf24' : '#94a3b8'}" font-size="11" font-weight="${isSel ? '800' : '600'}" font-family="Inter, sans-serif">${c.seg.shortLabel}</text>
+            `);
+            if (isSel || coords.length <= 7) {
+              parts.push(`
+                <text x="${c.x.toFixed(1)}" y="${(c.y - 12).toFixed(1)}" text-anchor="middle" fill="${isSel ? '#ffffff' : '#fde68a'}" font-size="11" font-weight="700" font-family="Inter, sans-serif">${c.seg.velMs.toFixed(2)}</text>
+              `);
+            }
+            parts.push(`
+              <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${isSel ? 9 : 6}" fill="${isSel ? 'rgba(245, 158, 11, 0.28)' : 'rgba(16, 185, 129, 0.18)'}" />
+              <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${isSel ? 5 : 3.5}" fill="${isSel ? '#f59e0b' : '#10b981'}" stroke="#090d16" stroke-width="1.5" />
+              <circle data-chart-idx="${c.idx}" cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="18" fill="transparent" class="chart-hit cursor-pointer" />
+            `);
+          });
+
+          parts.push(`
+            <text x="${padLeft}" y="13" text-anchor="start" fill="#cbd5e1" font-size="11" font-weight="700" font-family="Inter, sans-serif">Velocidad (m/s)</text>
+          `);
+
+          svg.innerHTML = parts.join('');
+
+          svg.querySelectorAll('.chart-hit').forEach((el) => {
+            const idx = Number(el.getAttribute('data-chart-idx'));
+            const pick = (ev) => {
+              ev.preventDefault();
+              appState.selectedSegmentIndex = idx;
+              persistState();
+              renderChartView(computeMetrics());
+            };
+            el.addEventListener('click', pick);
+            el.addEventListener('touchend', pick, { passive: false });
+          });
+
+          tableBody.innerHTML = segments
+            .map((seg, idx) => {
+              const prev = idx > 0 ? segments[idx - 1] : null;
+              let deltaMsStr = '—';
+              let deltaPctStr = '—';
+              let deltaClass = 'text-slate-400';
+
+              if (prev && prev.velMs > 0) {
+                const dMs = seg.velMs - prev.velMs;
+                const dPct = (dMs / prev.velMs) * 100;
+                const sgn = dMs >= 0 ? '+' : '';
+                deltaMsStr = `${sgn}${dMs.toFixed(2)}`;
+                deltaPctStr = `${sgn}${dPct.toFixed(1)}%`;
+                deltaClass = dMs >= 0 ? 'text-emerald-400' : 'text-rose-400';
+              }
+
+              const rowHighlight = idx === selIdx ? 'bg-amber-500/12' : 'hover:bg-track-cardAlt/50';
+
+              return `
+                <tr data-row-idx="${idx}" class="chart-table-row cursor-pointer transition ${rowHighlight}">
+                  <td class="py-2 px-3 font-bold text-white">${escapeHtml(seg.label)}</td>
+                  <td class="py-2 px-3 text-right text-slate-300">${formatDuration(seg.difSec)}</td>
+                  <td class="py-2 px-3 text-right font-extrabold text-amber-300">${seg.velMs.toFixed(2)}</td>
+                  <td class="py-2 px-3 text-right font-bold ${deltaClass}">${deltaMsStr}</td>
+                  <td class="py-2 px-3 text-right font-bold ${deltaClass}">${deltaPctStr}</td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          tableBody.querySelectorAll('.chart-table-row').forEach((tr) => {
+            tr.addEventListener('click', () => {
+              const idx = Number(tr.getAttribute('data-row-idx'));
+              appState.selectedSegmentIndex = idx;
+              persistState();
+              renderChartView(computeMetrics());
+            });
+          });
+        } catch (_err) {
+          // Ignorar error de gráfico
+        }
+      }
+
+      // =====================================================================
+      // 7. HISTORIAL, PERSISTENCIA Y EXPORTACIÓN (RESUMEN, CSV, JSON)
+      // =====================================================================
+      function buildSummaryText(m) {
+        const pigName = getEffectivePigType(appState);
+        const lines = [
+          `SCRAPER TRACK by Fran SaLou`,
+          `Tipo de PIG / Equipo: ${pigName}`,
+          `Lanzamiento: ${appState.launchTime || '--:--'} | Longitud: ${m.kmTotal.toFixed(1)} km | Paso: ${m.stepMeters} m`,
+          `Ducto: ${appState.inchNominal}" (Ø ext ${appState.odMm} mm, esp ${appState.wallMm} mm) | Presión: ${m.pressure} bar`,
+          `Media tiempo: ${formatDuration(m.avgDifSec)} | Media vel: ${
+            m.avgVelMs !== null ? m.avgVelMs.toFixed(2) + ' m/s' : '--'
+          } | % Carrera: ${m.pctCarrera.toFixed(1)}% | Llegada est.: ${formatClockFromSeconds(m.horaLlegadaSec)}`,
+          `Líquido: ${m.liquidM3h} m³/h | Cap. total: ${m.totalCapM3.toFixed(2)} m³ | Pos. aprox.: ${m.approxKm.toFixed(2)} km (±${appState.errorKm} km)`,
+          `Gas: ${m.gasDay.toLocaleString('es-AR')} m³/día (${m.gasM3h.toFixed(1)} m³/h · ${m.gasVelMs.toFixed(2)} m/s)`,
+          '--- Registro por PK ---',
+        ];
+
+        m.rows.forEach((r) => {
+          const difStr = r.pk === 0 ? '—' : formatDuration(r.difSec);
+          const velStr = r.pk === 0 ? '—' : r.velMs !== null ? `${r.velMs.toFixed(2)} m/s` : '--';
+          lines.push(`${r.label.padEnd(5)} | ${r.distanceKm.toFixed(2)} km | Hora: ${r.timeStr || '--:--'} | Dif: ${difStr} | Vel: ${velStr}`);
+        });
+
+        return lines.join('\n');
+      }
+
+      function buildCsvText(m) {
+        const pigName = getEffectivePigType(appState);
+        const header = ['Tipo_PIG', 'PK', 'Distancia_km', 'Hora_Pasaje', 'Dif_seg', 'Dif', 'TA_seg', 'TA', 'Vel_ms'].join(',');
+        const body = m.rows.map((r) =>
+          [
+            `"${pigName.replace(/"/g, '""')}"`,
+            `"${r.label}"`,
+            r.distanceKm.toFixed(2),
+            `"${r.timeStr || ''}"`,
+            r.difSec !== null ? r.difSec : '',
+            `"${r.pk === 0 ? '' : formatDuration(r.difSec)}"`,
+            r.tCumSec !== null ? r.tCumSec : '',
+            `"${formatDuration(r.tCumSec)}"`,
+            r.velMs !== null ? r.velMs.toFixed(3) : '',
+          ].join(',')
+        );
+        return [header, ...body].join('\n');
+      }
+
+      function triggerDownload(content, filename, mimeType) {
+        try {
+          const blob = new Blob([content], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          showToast(`Exportado: ${filename}`, 'success');
+        } catch (_err) {
+          showToast('No se pudo descargar el archivo en este entorno', 'warn');
+        }
+      }
+
+      function copyTextSafe(text) {
+        try {
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(text).then(
+              () => showToast('Resumen copiado al portapapeles', 'success'),
+              () => fallbackCopy(text)
+            );
+            return;
+          }
+        } catch (_err) {
+          // Usar respaldo DOM
+        }
+        fallbackCopy(text);
+      }
+
+      function fallbackCopy(text) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('Resumen copiado al portapapeles', 'success');
+        } catch (_err) {
+          showToast('Copiá el texto desde la vista previa', 'warn');
+        }
+      }
+
+      function persistState() {
+        writeStorageSafe(STORAGE_KEY_STATE, JSON.stringify(appState));
+      }
+
+      function persistHistory() {
+        writeStorageSafe(STORAGE_KEY_HISTORY, JSON.stringify(savedRuns));
+      }
+
+      function loadPersistedData() {
+        try {
+          const rawState = readStorageSafe(STORAGE_KEY_STATE);
+          if (rawState) {
+            const parsed = JSON.parse(rawState);
+            if (parsed && typeof parsed === 'object') {
+              const def = createDefaultState();
+              appState = Object.assign({}, def, parsed, {
+                pkTimes: Object.assign({}, def.pkTimes, parsed.pkTimes || {}),
+              });
+            }
+          }
+        } catch (_err) {
+          appState = createDefaultState();
+        }
+
+        try {
+          const rawHist = readStorageSafe(STORAGE_KEY_HISTORY);
+          if (rawHist) {
+            const parsedHist = JSON.parse(rawHist);
+            if (Array.isArray(parsedHist)) {
+              savedRuns = parsedHist;
+            }
+          }
+        } catch (_err) {
+          savedRuns = [];
+        }
+      }
+
+      function saveRunToHistory(customName = '') {
+        try {
+          const m = computeMetrics();
+          const pigName = getEffectivePigType(appState);
+          const input = document.getElementById('inputRunName');
+          const typed = (customName || (input ? input.value : '') || '').trim();
+          const stamp = new Date().toLocaleString('es-AR', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+
+          const item = {
+            id: `run_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+            name: typed || `${pigName} ${appState.inchNominal}" (${stamp})`,
+            savedAt: stamp,
+            pigType: pigName,
+            summary: {
+              pigType: pigName,
+              pctCarrera: m.pctCarrera,
+              avgVelMs: m.avgVelMs,
+              kmTotal: m.kmTotal,
+              launchTime: appState.launchTime,
+            },
+            snapshot: JSON.parse(JSON.stringify(appState)),
+          };
+
+          savedRuns.unshift(item);
+          if (savedRuns.length > 30) savedRuns = savedRuns.slice(0, 30);
+          persistHistory();
+          if (input && !customName) input.value = '';
+          renderHistoryView(m);
+          showToast(`Guardada: ${item.name}`, 'success');
+        } catch (_err) {
+          showToast('No se pudo guardar la corrida', 'warn');
+        }
+      }
+
+      function renderHistoryView(m) {
+        try {
+          const badge = document.getElementById('storageModeBadge');
+          if (badge) {
+            badge.textContent = usingMemoryFallback ? 'Memoria temporal segura' : 'Almacenamiento local';
+          }
+
+          const countEl = document.getElementById('savedRunsCount');
+          if (countEl) {
+            countEl.textContent = `${savedRuns.length} ${savedRuns.length === 1 ? 'corrida' : 'corridas'}`;
+          }
+
+          const previewEl = document.getElementById('reportPreviewText');
+          if (previewEl) {
+            previewEl.textContent = buildSummaryText(m);
+          }
+
+          const listEl = document.getElementById('savedRunsList');
+          if (!listEl) return;
+
+          if (savedRuns.length === 0) {
+            listEl.innerHTML = `
+              <div class="rounded-xl border border-dashed border-track-border p-4 text-center text-xs text-slate-400">
+                No hay corridas guardadas todavía. Tocá "Guardar corrida" para registrar una.
+              </div>
+            `;
+            return;
+          }
+
+          listEl.innerHTML = savedRuns
+            .map((run) => {
+              const runPig = run.pigType || (run.summary && run.summary.pigType) || getEffectivePigType(run.snapshot);
+              return `
+                <div class="rounded-xl bg-track-bg border border-track-border p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm font-extrabold text-white truncate">${escapeHtml(run.name)}</span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/35">${escapeHtml(runPig)}</span>
+                    </div>
+                    <div class="text-xs text-slate-400 tabular-nums mt-0.5">
+                      ${escapeHtml(run.savedAt)} · Lanz ${escapeHtml((run.summary && run.summary.launchTime) || '--:--')} · ${Number((run.summary && run.summary.pctCarrera) || 0).toFixed(1)}% · Vel ${
+                        run.summary && run.summary.avgVelMs !== null && run.summary.avgVelMs !== undefined
+                          ? Number(run.summary.avgVelMs).toFixed(2) + ' m/s'
+                          : '--'
+                      }
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      data-load-run="${escapeHtml(run.id)}"
+                      class="load-run-btn touch-target px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-bold text-amber-300 transition active:scale-95"
+                    >
+                      Cargar
+                    </button>
+                    <button
+                      type="button"
+                      data-del-run="${escapeHtml(run.id)}"
+                      class="del-run-btn touch-target px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/35 text-xs font-bold text-rose-300 transition active:scale-95"
+                    >
+                      Borrar
+                    </button>
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+
+          listEl.querySelectorAll('.load-run-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const id = btn.getAttribute('data-load-run');
+              const found = savedRuns.find((r) => r.id === id);
+              if (found && found.snapshot) {
+                appState = Object.assign(createDefaultState(), JSON.parse(JSON.stringify(found.snapshot)));
+                appState.activeTab = 'carrera';
+                persistState();
+                renderAll();
+                switchTab('carrera');
+                showToast(`Corrida cargada: ${found.name}`, 'success');
+              }
+            });
+          });
+
+          listEl.querySelectorAll('.del-run-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const id = btn.getAttribute('data-del-run');
+              savedRuns = savedRuns.filter((r) => r.id !== id);
+              persistHistory();
+              renderHistoryView(computeMetrics());
+              showToast('Corrida borrada', 'info');
+            });
+          });
+        } catch (_err) {
+          // Ignorar error de renderizado del historial
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function renderAll() {
+        try {
+          const m = computeMetrics();
+          renderHeaderAndCarrera(m);
+          renderVolumenesView(m);
+          if (appState.activeTab === 'grafico') {
+            renderChartView(m);
+          }
+          if (appState.activeTab === 'historial') {
+            renderHistoryView(m);
+          }
+        } catch (_err) {
+          // Evitar pantalla en blanco ante cualquier error puntual
+        }
+      }
+
+      // =====================================================================
+      // 8. ENLACE DE EVENTOS Y SOPORTE PWA SEGURO
+      // =====================================================================
+      function bindEvents() {
+        try {
+          document.querySelectorAll('.nav-tab-btn').forEach((btn) => {
+            btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+          });
+
+          const pigSelectEl = document.getElementById('headerPigTypeSelect');
+          if (pigSelectEl) {
+            pigSelectEl.addEventListener('change', () => {
+              appState.pigType = pigSelectEl.value || 'MFL estándar';
+              persistState();
+              renderAll();
+              if (appState.activeTab === 'historial') {
+                renderHistoryView(computeMetrics());
+              }
+              if (appState.pigType === 'Personalizado / Otro') {
+                const customInput = document.getElementById('headerCustomPigInput');
+                if (customInput) {
+                  customInput.classList.remove('hidden');
+                  customInput.focus();
+                }
+              } else {
+                showToast(`Equipo: ${getEffectivePigType(appState)}`, 'info');
+              }
+            });
+          }
+
+          const customPigInputEl = document.getElementById('headerCustomPigInput');
+          if (customPigInputEl) {
+            customPigInputEl.addEventListener('input', () => {
+              appState.customPigType = customPigInputEl.value;
+              persistState();
+              const activePigLabelEl = document.getElementById('headerActivePigLabel');
+              if (activePigLabelEl) {
+                activePigLabelEl.textContent = getEffectivePigType(appState);
+              }
+              if (appState.activeTab === 'historial') {
+                renderHistoryView(computeMetrics());
+              }
+            });
+          }
+
+          const launchInput = document.getElementById('inputLaunchTime');
+          if (launchInput) {
+            launchInput.addEventListener('change', (e) => {
+              appState.launchTime = e.target.value || '';
+              persistState();
+              renderAll();
+            });
+          }
+
+          const btnNowLaunch = document.getElementById('btnNowLaunch');
+          if (btnNowLaunch) {
+            btnNowLaunch.addEventListener('click', () => {
+              appState.launchTime = getNowTimeString();
+              persistState();
+              renderAll();
+              showToast(`Lanzamiento: ${appState.launchTime}`, 'info');
+            });
+          }
+
+          const bindNum = (id, key, minVal, fallbackVal) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', () => {
+              const n = Number(el.value);
+              appState[key] = Number.isFinite(n) && n >= minVal ? n : fallbackVal;
+              persistState();
+              renderAll();
+            });
+          };
+
+          bindNum('inputKmCarrera', 'kmTotal', 0.1, 15.6);
+          bindNum('inputStepCarrera', 'stepMeters', 1, 1000);
+          bindNum('paramODmm', 'odMm', 1, 219.075);
+          bindNum('paramWallMm', 'wallMm', 0, 6.4);
+          bindNum('paramLiquidM3h', 'liquidM3h', 0, 64);
+          bindNum('paramGasDay', 'gasDay', 0, 900000);
+          bindNum('paramPressure', 'pressure', 0, 84);
+          bindNum('paramErrorKm', 'errorKm', 0, 1.5);
+
+          const passContainer = document.getElementById('passRowsContainer');
+          if (passContainer) {
+            passContainer.addEventListener('change', (e) => {
+              const input = e.target.closest('.pk-time-input');
+              if (!input) return;
+              const pk = Number(input.getAttribute('data-pk'));
+              const val = input.value || '';
+              if (pk === 0) {
+                appState.launchTime = val;
+              } else {
+                if (!appState.pkTimes) appState.pkTimes = {};
+                if (val) appState.pkTimes[pk] = val;
+                else delete appState.pkTimes[pk];
+              }
+              persistState();
+              renderAll();
+            });
+
+            passContainer.addEventListener('click', (e) => {
+              const btn = e.target.closest('.pk-now-btn');
+              if (!btn) return;
+              const pk = Number(btn.getAttribute('data-now-pk'));
+              const nowStr = getNowTimeString();
+              if (pk === 0) {
+                appState.launchTime = nowStr;
+              } else {
+                if (!appState.pkTimes) appState.pkTimes = {};
+                appState.pkTimes[pk] = nowStr;
+              }
+              persistState();
+              renderAll();
+              showToast(`${pk === 0 ? 'Lanz' : 'PK ' + pk}: ${nowStr}`, 'info');
+            });
+          }
+
+          const btnClear = document.getElementById('btnClearPasses');
+          if (btnClear) {
+            btnClear.addEventListener('click', () => {
+              appState.pkTimes = {};
+              appState.selectedSegmentIndex = null;
+              persistState();
+              renderAll();
+              showToast('Horarios de PK limpiados', 'warn');
+            });
+          }
+
+          const btnSaveQuick = document.getElementById('btnSaveQuickRun');
+          if (btnSaveQuick) {
+            btnSaveQuick.addEventListener('click', () => saveRunToHistory());
+          }
+
+          const inchSelect = document.getElementById('paramInch');
+          if (inchSelect) {
+            inchSelect.addEventListener('change', () => {
+              const inch = Number(inchSelect.value) || 8;
+              appState.inchNominal = inch;
+              if (INCH_TO_OD_MM[inch]) {
+                appState.odMm = INCH_TO_OD_MM[inch];
+              }
+              persistState();
+              renderAll();
+            });
+          }
+
+          const curTimeInput = document.getElementById('paramCurrentTime');
+          if (curTimeInput) {
+            curTimeInput.addEventListener('change', () => {
+              if (curTimeInput.value) {
+                appState.currentTime = curTimeInput.value;
+                persistState();
+                renderAll();
+              }
+            });
+          }
+
+          const btnSyncNowVol = document.getElementById('btnSyncNowVol');
+          if (btnSyncNowVol) {
+            btnSyncNowVol.addEventListener('click', () => {
+              appState.currentTime = getNowTimeString();
+              persistState();
+              renderAll();
+              showToast(`Hora actual: ${appState.currentTime}`, 'info');
+            });
+          }
+
+          const btnResetVol = document.getElementById('btnResetVolParams');
+          if (btnResetVol) {
+            btnResetVol.addEventListener('click', () => {
+              const def = createDefaultState();
+              appState.inchNominal = def.inchNominal;
+              appState.odMm = def.odMm;
+              appState.wallMm = def.wallMm;
+              appState.liquidM3h = def.liquidM3h;
+              appState.gasDay = def.gasDay;
+              appState.pressure = def.pressure;
+              appState.currentTime = def.currentTime;
+              appState.errorKm = def.errorKm;
+              persistState();
+              renderAll();
+              showToast('Parámetros de ducto restablecidos', 'info');
+            });
+          }
+
+          const btnToggleAvg = document.getElementById('btnToggleAvgLine');
+          if (btnToggleAvg) {
+            btnToggleAvg.addEventListener('click', () => {
+              appState.chartShowAvg = !appState.chartShowAvg;
+              persistState();
+              renderChartView(computeMetrics());
+            });
+          }
+
+          const btnToggleHyd = document.getElementById('btnToggleHydLine');
+          if (btnToggleHyd) {
+            btnToggleHyd.addEventListener('click', () => {
+              appState.chartShowHyd = !appState.chartShowHyd;
+              persistState();
+              renderChartView(computeMetrics());
+            });
+          }
+
+          const btnSaveHist = document.getElementById('btnSaveRunToHistory');
+          if (btnSaveHist) {
+            btnSaveHist.addEventListener('click', () => saveRunToHistory());
+          }
+
+          const btnResetAll = document.getElementById('btnResetAllDefaults');
+          if (btnResetAll) {
+            btnResetAll.addEventListener('click', () => {
+              appState = createDefaultState();
+              persistState();
+              renderAll();
+              switchTab('carrera');
+              showToast('Corrida reiniciada a valores base', 'success');
+            });
+          }
+
+          const btnCopy = document.getElementById('btnCopySummary');
+          if (btnCopy) {
+            btnCopy.addEventListener('click', () => copyTextSafe(buildSummaryText(computeMetrics())));
+          }
+
+          const btnCsv = document.getElementById('btnExportCsv');
+          if (btnCsv) {
+            btnCsv.addEventListener('click', () =>
+              triggerDownload(buildCsvText(computeMetrics()), 'scraper_track_fran_salou.csv', 'text/csv;charset=utf-8;')
+            );
+          }
+
+          const btnJson = document.getElementById('btnExportJson');
+          if (btnJson) {
+            btnJson.addEventListener('click', () => {
+              const m = computeMetrics();
+              const pigName = getEffectivePigType(appState);
+              const payload = JSON.stringify(
+                {
+                  app: 'SCRAPER TRACK by Fran SaLou',
+                  pigType: pigName,
+                  exportedAt: new Date().toISOString(),
+                  state: appState,
+                  kpis: {
+                    pigType: pigName,
+                    mediaTiempo: formatDuration(m.avgDifSec),
+                    mediaVelMs: m.avgVelMs,
+                    tiempoCarrera: formatDuration(m.tiempoCarreraSec),
+                    pctCarrera: m.pctCarrera,
+                    duracionProm: formatDuration(m.avgPkDurationSec),
+                    restante: formatDuration(m.remainingSec),
+                    horaLlegada: formatClockFromSeconds(m.horaLlegadaSec),
+                    totalCapM3: m.totalCapM3,
+                    approxKm: m.approxKm,
+                    gasVelMs: m.gasVelMs,
+                  },
+                },
+                null,
+                2
+              );
+              triggerDownload(payload, 'scraper_track_fran_salou.json', 'application/json;charset=utf-8;');
+            });
+          }
+        } catch (_err) {
+          // Ignorar errores de enlace de eventos
+        }
+      }
+
+      function setupPwaSafe() {
+        try {
+          const manifest = {
+            name: 'SCRAPER TRACK by Fran SaLou',
+            short_name: 'Scraper Track',
+            start_url: '.',
+            display: 'standalone',
+            background_color: '#090d16',
+            theme_color: '#090d16',
+            orientation: 'portrait-primary',
+          };
+          const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('link');
+          link.rel = 'manifest';
+          link.href = url;
+          document.head.appendChild(link);
+        } catch (_err) {
+          // Ignorar si el navegador bloquea manifest dinámico
+        }
+
+        try {
+          if ('serviceWorker' in navigator && window.isSecureContext) {
+            const swCode = `
+              const CACHE_NAME = 'scraper-track-fran-salou-v1';
+              self.addEventListener('install', (e) => self.skipWaiting());
+              self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+              self.addEventListener('fetch', (e) => {
+                if (e.request.method !== 'GET') return;
+                e.respondWith(
+                  caches.match(e.request).then((cached) => cached || fetch(e.request).then((res) => {
+                    const copy = res.clone();
+                    caches.open(CACHE_NAME).then((c) => c.put(e.request, copy)).catch(() => {});
+                    return res;
+                  }).catch(() => cached))
+                );
+              });
+            `;
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(swBlob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
+          }
+        } catch (_err) {
+          // Ignorar errores de service worker
+        }
+      }
+
+      function bootApp() {
+        try {
+          loadPersistedData();
+          bindEvents();
+          renderAll();
+          switchTab(appState.activeTab || 'carrera');
+          setupPwaSafe();
+        } catch (_err) {
+          // Garantizar que la interfaz siga visible y funcional
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootApp, { once: true });
+      } else {
+        bootApp();
+      }
+    })();
+  </script>
+</body>
+</html>
