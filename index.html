@@ -553,6 +553,10 @@
 
             <div class="bg-track-cardAlt border border-emerald-500/25 rounded-xl p-3 space-y-1.5 text-xs">
               <div class="flex items-center justify-between">
+                <span class="text-slate-300 font-semibold">Vel. gas aj. presión (base→línea):</span>
+                <span id="resGasPressAdjVelMs" class="text-sm font-extrabold text-emerald-300 tabular-nums">0.00 m/s</span>
+              </div>
+              <div class="flex items-center justify-between">
                 <span class="text-slate-300 font-semibold">Volumen gas acumulado:</span>
                 <span id="resGasTranspM3" class="font-bold text-white tabular-nums">0 m³</span>
               </div>
@@ -1163,7 +1167,7 @@
           const avgKmh = capPerKm > 0 ? liquidM3h / capPerKm : 0;
           const hydVelMs = avgKmh / 3.6;
 
-          // Cálculos de gas
+          // Cálculos de gas y velocidad de desplazamiento en m/s
           const gasDay = Math.max(0, Number(appState.gasDay) || 0);
           const pressure = Math.max(0, Number(appState.pressure) || 0);
           const gasM3h = gasDay / 24;
@@ -1172,6 +1176,7 @@
           const gasTranspM3 = gasM3h * elapsedHours;
           const pressureFactor = Math.max(1, (pressure + 1.01325) / 1.01325);
           const gasPressAdjM3 = gasTranspM3 / pressureFactor;
+          const gasPressAdjVelMs = gasVelMs / pressureFactor;
           const gasPumpTimeSec = gasVelMs > 0 ? totalMeters / gasVelMs : null;
 
           return {
@@ -1207,6 +1212,7 @@
             gasVelMs,
             gasTranspM3,
             gasPressAdjM3,
+            gasPressAdjVelMs,
             gasPumpTimeSec,
           };
         } catch (_err) {
@@ -1243,6 +1249,7 @@
             gasVelMs: 0,
             gasTranspM3: 0,
             gasPressAdjM3: 0,
+            gasPressAdjVelMs: 0,
             gasPumpTimeSec: null,
           };
         }
@@ -1469,6 +1476,7 @@
           document.getElementById('resGasPressAdjM3').textContent =
             `${Math.round(m.gasPressAdjM3).toLocaleString('es-AR')} m³`;
           document.getElementById('resGasPumpTime').textContent = formatDuration(m.gasPumpTimeSec);
+          document.getElementById('resGasPressAdjVelMs').textContent = `${m.gasPressAdjVelMs.toFixed(2)} m/s`;
           document.getElementById('resGasTranspM3').textContent =
             `${Math.round(m.gasTranspM3).toLocaleString('es-AR')} m³`;
           document.getElementById('resInnerAreaM2').textContent = `${m.innerAreaM2.toFixed(4)} m²`;
@@ -1729,7 +1737,7 @@
             m.avgVelMs !== null ? m.avgVelMs.toFixed(2) + ' m/s' : '--'
           } | % Carrera: ${m.pctCarrera.toFixed(1)}% | Llegada est.: ${formatClockFromSeconds(m.horaLlegadaSec)}`,
           `Líquido: ${m.liquidM3h} m³/h | Cap. total: ${m.totalCapM3.toFixed(2)} m³ | Pos. aprox.: ${m.approxKm.toFixed(2)} km (±${appState.errorKm} km)`,
-          `Gas: ${m.gasDay.toLocaleString('es-AR')} m³/día (${m.gasM3h.toFixed(1)} m³/h · ${m.gasVelMs.toFixed(2)} m/s)`,
+          `Gas: ${m.gasDay.toLocaleString('es-AR')} m³/día (${m.gasM3h.toFixed(1)} m³/h · Vel: ${m.gasVelMs.toFixed(2)} m/s · Aj. presión: ${m.gasPressAdjVelMs.toFixed(2)} m/s)`,
           '--- Registro por PK ---',
         ];
 
@@ -2263,6 +2271,7 @@
                     totalCapM3: m.totalCapM3,
                     approxKm: m.approxKm,
                     gasVelMs: m.gasVelMs,
+                    gasPressAdjVelMs: m.gasPressAdjVelMs,
                   },
                 },
                 null,
