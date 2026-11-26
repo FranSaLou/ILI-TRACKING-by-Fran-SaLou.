@@ -373,120 +373,164 @@
       <!-- ================================================================= -->
       <section id="tab-volumenes" class="tab-panel hidden space-y-4">
         <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-4">
-          <div class="flex items-center justify-between border-b border-track-border pb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-track-border pb-3">
             <div>
-              <h2 class="text-sm sm:text-base font-extrabold text-white">Parámetros de Ducto, Líquido y Gas</h2>
-              <p class="text-xs text-slate-400">Diámetro nominal de 4" a 36", espesor, caudales, presión, hora actual y margen de error.</p>
-            </div>
-            <button
-              id="btnResetVolParams"
-              type="button"
-              class="touch-target px-3 py-1.5 rounded-xl bg-track-cardAlt hover:bg-slate-700 border border-track-border text-xs font-bold text-amber-300 transition active:scale-95"
-            >
-              Base
-            </button>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            <!-- Diámetro nominal en pulgadas (4" a 36") -->
-            <div>
-              <label for="paramInch" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Diámetro (")
-              </label>
-              <select id="paramInch" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums">
-                <option value="4">4"</option>
-                <option value="6">6"</option>
-                <option value="8" selected>8"</option>
-                <option value="10">10"</option>
-                <option value="12">12"</option>
-                <option value="14">14"</option>
-                <option value="16">16"</option>
-                <option value="18">18"</option>
-                <option value="20">20"</option>
-                <option value="22">22"</option>
-                <option value="24">24"</option>
-                <option value="26">26"</option>
-                <option value="28">28"</option>
-                <option value="30">30"</option>
-                <option value="32">32"</option>
-                <option value="34">34"</option>
-                <option value="36">36"</option>
-              </select>
+              <h2 class="text-sm sm:text-base font-extrabold text-white">Parámetros de Ducto y Fluido</h2>
+              <p class="text-xs text-slate-400">Alterná entre corrida en líquido o gas para mostrar sus parámetros y cálculos específicos.</p>
             </div>
 
-            <!-- Diámetro exterior en mm -->
-            <div>
-              <label for="paramODmm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Ø Exterior (mm)
-              </label>
-              <input id="paramODmm" type="number" step="0.005" min="10" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
-            </div>
-
-            <!-- Espesor en mm -->
-            <div>
-              <label for="paramWallMm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Espesor (mm)
-              </label>
-              <input id="paramWallMm" type="number" step="0.1" min="0.5" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
-            </div>
-
-            <!-- Caudal de bombeo de líquido en m3/h -->
-            <div>
-              <label for="paramLiquidM3h" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Bombeo líquido (m³/h)
-              </label>
-              <input id="paramLiquidM3h" type="number" step="1" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-sky-300 tabular-nums" />
-            </div>
-
-            <!-- Caudal de gas en m3/día -->
-            <div>
-              <label for="paramGasDay" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Caudal gas (m³/día)
-              </label>
-              <input id="paramGasDay" type="number" step="1000" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-emerald-300 tabular-nums" />
-            </div>
-
-            <!-- Presión -->
-            <div>
-              <label for="paramPressure" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Presión (bar)
-              </label>
-              <input id="paramPressure" type="number" step="0.5" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
-            </div>
-
-            <!-- Hora actual -->
-            <div>
-              <label for="paramCurrentTime" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Hora actual
-              </label>
-              <div class="flex items-center gap-1.5">
-                <input id="paramCurrentTime" type="time" step="1" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-2.5 py-2 text-sm font-bold text-amber-300 tabular-nums" />
-                <button id="btnSyncNowVol" type="button" class="touch-target px-2.5 rounded-xl bg-track-cardAlt border border-track-border text-xs font-bold text-slate-200 hover:bg-slate-700">
-                  Ahora
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+              <!-- Selector de fluido Líquido / Gas -->
+              <div role="group" aria-label="Tipo de fluido de la corrida" class="inline-flex rounded-xl bg-track-bg p-1 border border-track-border">
+                <button
+                  id="btnModeLiquid"
+                  type="button"
+                  class="touch-target px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition bg-sky-500/20 text-sky-300 border border-sky-400/50"
+                >
+                  Líquido
+                </button>
+                <button
+                  id="btnModeGas"
+                  type="button"
+                  class="touch-target px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-400 hover:text-slate-200 border border-transparent"
+                >
+                  Gas
                 </button>
               </div>
-            </div>
 
-            <!-- Margen de error en km -->
-            <div>
-              <label for="paramErrorKm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                Margen error (± km)
-              </label>
-              <input id="paramErrorKm" type="number" step="0.1" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums" />
+              <button
+                id="btnResetVolParams"
+                type="button"
+                class="touch-target px-3 py-1.5 rounded-xl bg-track-cardAlt hover:bg-slate-700 border border-track-border text-xs font-bold text-amber-300 transition active:scale-95"
+              >
+                Base
+              </button>
+            </div>
+          </div>
+
+          <!-- Parámetros geométricos y operativos del ducto -->
+          <div class="space-y-2">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Geometría del Ducto y Tiempo
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <!-- Diámetro nominal en pulgadas (4" a 36") -->
+              <div>
+                <label for="paramInch" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Diámetro (")
+                </label>
+                <select id="paramInch" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums">
+                  <option value="4">4"</option>
+                  <option value="6">6"</option>
+                  <option value="8" selected>8"</option>
+                  <option value="10">10"</option>
+                  <option value="12">12"</option>
+                  <option value="14">14"</option>
+                  <option value="16">16"</option>
+                  <option value="18">18"</option>
+                  <option value="20">20"</option>
+                  <option value="22">22"</option>
+                  <option value="24">24"</option>
+                  <option value="26">26"</option>
+                  <option value="28">28"</option>
+                  <option value="30">30"</option>
+                  <option value="32">32"</option>
+                  <option value="34">34"</option>
+                  <option value="36">36"</option>
+                </select>
+              </div>
+
+              <!-- Diámetro exterior en mm -->
+              <div>
+                <label for="paramODmm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Ø Exterior (mm)
+                </label>
+                <input id="paramODmm" type="number" step="0.005" min="10" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
+              </div>
+
+              <!-- Espesor en mm -->
+              <div>
+                <label for="paramWallMm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Espesor (mm)
+                </label>
+                <input id="paramWallMm" type="number" step="0.1" min="0.5" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
+              </div>
+
+              <!-- Hora actual -->
+              <div>
+                <label for="paramCurrentTime" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Hora actual
+                </label>
+                <div class="flex items-center gap-1.5">
+                  <input id="paramCurrentTime" type="time" step="1" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-2.5 py-2 text-sm font-bold text-amber-300 tabular-nums" />
+                  <button id="btnSyncNowVol" type="button" class="touch-target px-2.5 rounded-xl bg-track-cardAlt border border-track-border text-xs font-bold text-slate-200 hover:bg-slate-700">
+                    Ahora
+                  </button>
+                </div>
+              </div>
+
+              <!-- Margen de error en km -->
+              <div>
+                <label for="paramErrorKm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Margen error (± km)
+                </label>
+                <input id="paramErrorKm" type="number" step="0.1" min="0" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloque exclusivo de parámetros de LÍQUIDO -->
+          <div id="liquidParamsSection" class="pt-3 border-t border-track-border/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400">Parámetros de Bombeo (Líquido)</span>
+              <span class="text-[11px] text-slate-400">Corrida impulsada por líquido</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="paramLiquidM3h" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Bombeo líquido (m³/h)
+                </label>
+                <input id="paramLiquidM3h" type="number" step="1" min="0" class="w-full bg-track-bg border border-sky-500/40 focus:border-sky-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-sky-300 tabular-nums" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloque exclusivo de parámetros de GAS -->
+          <div id="gasParamsSection" class="hidden pt-3 border-t border-track-border/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Parámetros de Flujo (Gas)</span>
+              <span class="text-[11px] text-slate-400">Corrida impulsada por gas</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Caudal de gas en m3/día -->
+              <div>
+                <label for="paramGasDay" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Caudal gas (m³/día)
+                </label>
+                <input id="paramGasDay" type="number" step="1000" min="0" class="w-full bg-track-bg border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-emerald-300 tabular-nums" />
+              </div>
+
+              <!-- Presión -->
+              <div>
+                <label for="paramPressure" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Presión operativa (bar)
+                </label>
+                <input id="paramPressure" type="number" step="0.5" min="0" class="w-full bg-track-bg border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Resultados de Líquido y Gas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Resultados separados según el fluido activo -->
+        <div class="space-y-4">
           <!-- Tarjeta Líquido -->
-          <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-3">
+          <div id="liquidResultsCard" class="bg-track-card border border-sky-500/35 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-extrabold text-sky-400 uppercase tracking-wider">Cálculo Líquido</h3>
               <span id="volInnerDiam" class="text-xs font-bold text-slate-300 tabular-nums">Ø int: 0.0000 m</span>
             </div>
 
-            <div class="grid grid-cols-2 gap-2.5">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
                 <div class="text-[11px] text-slate-400">Capacidad Total</div>
                 <div id="resTotalCapM3" class="text-base sm:text-lg font-extrabold text-white tabular-nums mt-0.5">0.00 m³</div>
@@ -526,13 +570,17 @@
           </div>
 
           <!-- Tarjeta Gas -->
-          <div class="bg-track-card border border-track-border rounded-2xl p-4 space-y-3">
+          <div id="gasResultsCard" class="hidden bg-track-card border border-emerald-500/35 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-extrabold text-emerald-400 uppercase tracking-wider">Cálculo Gas</h3>
-              <span id="resGasM3hBadge" class="text-xs font-bold text-emerald-300 tabular-nums">0 m³/h</span>
+              <div class="flex items-center gap-2 text-xs font-bold tabular-nums">
+                <span id="volInnerDiamGas" class="text-slate-300">Ø int: 0.0000 m</span>
+                <span class="text-slate-600">·</span>
+                <span id="resGasM3hBadge" class="text-emerald-300">0 m³/h</span>
+              </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2.5">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
                 <div class="text-[11px] text-slate-400">Caudal Horario</div>
                 <div id="resGasM3h" class="text-base sm:text-lg font-extrabold text-white tabular-nums mt-0.5">0.0 m³/h</div>
@@ -557,6 +605,14 @@
                 <span id="resGasPressAdjVelMs" class="text-sm font-extrabold text-emerald-300 tabular-nums">0.00 m/s</span>
               </div>
               <div class="flex items-center justify-between">
+                <span class="text-slate-300 font-semibold">Posición aprox. (flujo gas):</span>
+                <span id="resGasApproxKm" class="font-bold text-amber-400 tabular-nums">0.00 km</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Rango con margen (± km):</span>
+                <span id="resGasErrorRangeKm" class="font-bold text-slate-200 tabular-nums">0.00 km – 0.00 km</span>
+              </div>
+              <div class="flex items-center justify-between pt-1 border-t border-track-border/70">
                 <span class="text-slate-300 font-semibold">Volumen gas acumulado:</span>
                 <span id="resGasTranspM3" class="font-bold text-white tabular-nums">0 m³</span>
               </div>
@@ -877,6 +933,7 @@
       function createDefaultState() {
         return {
           activeTab: 'carrera',
+          fluidMode: 'liquid',
           pigType: 'MFL estándar',
           customPigType: '',
           launchTime: '06:37',
@@ -1178,6 +1235,9 @@
           const gasPressAdjM3 = gasTranspM3 / pressureFactor;
           const gasPressAdjVelMs = gasVelMs / pressureFactor;
           const gasPumpTimeSec = gasVelMs > 0 ? totalMeters / gasVelMs : null;
+          const gasApproxKm = Math.min(kmTotal, (gasVelMs * elapsedHours * 3600) / 1000);
+          const gasMinKm = Math.max(0, gasApproxKm - errorKm);
+          const gasMaxKm = Math.min(kmTotal, gasApproxKm + errorKm);
 
           return {
             kmTotal,
@@ -1214,6 +1274,9 @@
             gasPressAdjM3,
             gasPressAdjVelMs,
             gasPumpTimeSec,
+            gasApproxKm,
+            gasMinKm,
+            gasMaxKm,
           };
         } catch (_err) {
           return {
@@ -1251,6 +1314,9 @@
             gasPressAdjM3: 0,
             gasPressAdjVelMs: 0,
             gasPumpTimeSec: null,
+            gasApproxKm: 0,
+            gasMinKm: 0,
+            gasMaxKm: 1.5,
           };
         }
       }
@@ -1442,6 +1508,30 @@
 
       function renderVolumenesView(m) {
         try {
+          const isGas = appState.fluidMode === 'gas';
+          const btnLiq = document.getElementById('btnModeLiquid');
+          const btnGas = document.getElementById('btnModeGas');
+          const liqParams = document.getElementById('liquidParamsSection');
+          const gasParams = document.getElementById('gasParamsSection');
+          const liqCard = document.getElementById('liquidResultsCard');
+          const gasCard = document.getElementById('gasResultsCard');
+
+          if (btnLiq) {
+            btnLiq.className = !isGas
+              ? 'touch-target px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition bg-sky-500/20 text-sky-300 border border-sky-400/50'
+              : 'touch-target px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-400 hover:text-slate-200 border border-transparent';
+          }
+          if (btnGas) {
+            btnGas.className = isGas
+              ? 'touch-target px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition bg-emerald-500/20 text-emerald-300 border border-emerald-400/50'
+              : 'touch-target px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-400 hover:text-slate-200 border border-transparent';
+          }
+
+          if (liqParams) liqParams.classList.toggle('hidden', isGas);
+          if (gasParams) gasParams.classList.toggle('hidden', !isGas);
+          if (liqCard) liqCard.classList.toggle('hidden', isGas);
+          if (gasCard) gasCard.classList.toggle('hidden', !isGas);
+
           const setValIfIdle = (id, val) => {
             const el = document.getElementById(id);
             if (el && document.activeElement !== el) el.value = val;
@@ -1457,6 +1547,7 @@
           setValIfIdle('paramErrorKm', appState.errorKm);
 
           document.getElementById('volInnerDiam').textContent = `Ø int: ${m.dInM.toFixed(4)} m`;
+          document.getElementById('volInnerDiamGas').textContent = `Ø int: ${m.dInM.toFixed(4)} m`;
           document.getElementById('resTotalCapM3').textContent = `${m.totalCapM3.toFixed(2)} m³`;
           document.getElementById('resCapPerKm').textContent = `${m.capPerKm.toFixed(2)} m³/km`;
           document.getElementById('resElapsedHours').textContent = `${m.elapsedHours.toFixed(2)} h`;
@@ -1477,6 +1568,9 @@
             `${Math.round(m.gasPressAdjM3).toLocaleString('es-AR')} m³`;
           document.getElementById('resGasPumpTime').textContent = formatDuration(m.gasPumpTimeSec);
           document.getElementById('resGasPressAdjVelMs').textContent = `${m.gasPressAdjVelMs.toFixed(2)} m/s`;
+          document.getElementById('resGasApproxKm').textContent = `${m.gasApproxKm.toFixed(2)} km`;
+          document.getElementById('resGasErrorRangeKm').textContent =
+            `${m.gasMinKm.toFixed(2)} km – ${m.gasMaxKm.toFixed(2)} km`;
           document.getElementById('resGasTranspM3').textContent =
             `${Math.round(m.gasTranspM3).toLocaleString('es-AR')} m³`;
           document.getElementById('resInnerAreaM2').textContent = `${m.innerAreaM2.toFixed(4)} m²`;
@@ -1496,6 +1590,10 @@
           const countBadge = document.getElementById('chartPointCount');
           if (!svg || !tableBody) return;
 
+          const isGas = appState.fluidMode === 'gas';
+          const refVelMs = isGas ? m.gasVelMs : m.hydVelMs;
+          const refLabel = isGas ? 'Gas' : 'Líquido';
+
           const btnAvg = document.getElementById('btnToggleAvgLine');
           const btnHyd = document.getElementById('btnToggleHydLine');
           if (btnAvg) {
@@ -1504,8 +1602,11 @@
               : 'px-3 py-1.5 rounded-xl text-xs font-bold border border-track-border bg-track-bg text-slate-400 transition';
           }
           if (btnHyd) {
+            btnHyd.textContent = `Ref. ${refLabel}`;
             btnHyd.className = appState.chartShowHyd
-              ? 'px-3 py-1.5 rounded-xl text-xs font-bold border border-sky-500/60 bg-sky-500/20 text-sky-300 transition'
+              ? isGas
+                ? 'px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-500/60 bg-emerald-500/20 text-emerald-300 transition'
+                : 'px-3 py-1.5 rounded-xl text-xs font-bold border border-sky-500/60 bg-sky-500/20 text-sky-300 transition'
               : 'px-3 py-1.5 rounded-xl text-xs font-bold border border-track-border bg-track-bg text-slate-400 transition';
           }
 
@@ -1579,7 +1680,7 @@
 
           const candidates = [...vels];
           if (appState.chartShowAvg) candidates.push(avgVel);
-          if (appState.chartShowHyd && m.hydVelMs > 0) candidates.push(m.hydVelMs);
+          if (appState.chartShowHyd && refVelMs > 0) candidates.push(refVelMs);
 
           let yMin = Math.max(0, Math.floor((Math.min(...candidates) - 0.15) * 10) / 10);
           let yMax = Math.ceil((Math.max(...candidates) + 0.15) * 10) / 10;
@@ -1619,11 +1720,13 @@
             `);
           }
 
-          if (appState.chartShowHyd && m.hydVelMs > 0) {
-            const yHyd = getY(m.hydVelMs);
+          if (appState.chartShowHyd && refVelMs > 0) {
+            const yRef = getY(refVelMs);
+            const refStroke = isGas ? '#10b981' : '#38bdf8';
+            const refTextFill = isGas ? '#6ee7b7' : '#7dd3fc';
             parts.push(`
-              <line x1="${padLeft}" y1="${yHyd.toFixed(1)}" x2="${width - padRight}" y2="${yHyd.toFixed(1)}" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85" />
-              <text x="${padLeft + 6}" y="${(yHyd - 5).toFixed(1)}" text-anchor="start" fill="#7dd3fc" font-size="10" font-weight="700" font-family="Inter, sans-serif">Líquido ${m.hydVelMs.toFixed(2)} m/s</text>
+              <line x1="${padLeft}" y1="${yRef.toFixed(1)}" x2="${width - padRight}" y2="${yRef.toFixed(1)}" stroke="${refStroke}" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85" />
+              <text x="${padLeft + 6}" y="${(yRef - 5).toFixed(1)}" text-anchor="start" fill="${refTextFill}" font-size="10" font-weight="700" font-family="Inter, sans-serif">${refLabel} ${refVelMs.toFixed(2)} m/s</text>
             `);
           }
 
@@ -1728,16 +1831,20 @@
       // =====================================================================
       function buildSummaryText(m) {
         const pigName = getEffectivePigType(appState);
+        const isGas = appState.fluidMode === 'gas';
+        const fluidLine = isGas
+          ? `Fluido: Gas | ${m.gasDay.toLocaleString('es-AR')} m³/día (${m.gasM3h.toFixed(1)} m³/h · Vel: ${m.gasVelMs.toFixed(2)} m/s · Aj. presión: ${m.gasPressAdjVelMs.toFixed(2)} m/s)`
+          : `Fluido: Líquido | ${m.liquidM3h} m³/h | Cap. total: ${m.totalCapM3.toFixed(2)} m³ | Pos. aprox.: ${m.approxKm.toFixed(2)} km (±${appState.errorKm} km)`;
+
         const lines = [
           `SCRAPER TRACK by Fran SaLou`,
           `Tipo de PIG / Equipo: ${pigName}`,
           `Lanzamiento: ${appState.launchTime || '--:--'} | Longitud: ${m.kmTotal.toFixed(1)} km | Paso: ${m.stepMeters} m`,
-          `Ducto: ${appState.inchNominal}" (Ø ext ${appState.odMm} mm, esp ${appState.wallMm} mm) | Presión: ${m.pressure} bar`,
+          `Ducto: ${appState.inchNominal}" (Ø ext ${appState.odMm} mm, esp ${appState.wallMm} mm)${isGas ? ` | Presión: ${m.pressure} bar` : ''}`,
           `Media tiempo: ${formatDuration(m.avgDifSec)} | Media vel: ${
             m.avgVelMs !== null ? m.avgVelMs.toFixed(2) + ' m/s' : '--'
           } | % Carrera: ${m.pctCarrera.toFixed(1)}% | Llegada est.: ${formatClockFromSeconds(m.horaLlegadaSec)}`,
-          `Líquido: ${m.liquidM3h} m³/h | Cap. total: ${m.totalCapM3.toFixed(2)} m³ | Pos. aprox.: ${m.approxKm.toFixed(2)} km (±${appState.errorKm} km)`,
-          `Gas: ${m.gasDay.toLocaleString('es-AR')} m³/día (${m.gasM3h.toFixed(1)} m³/h · Vel: ${m.gasVelMs.toFixed(2)} m/s · Aj. presión: ${m.gasPressAdjVelMs.toFixed(2)} m/s)`,
+          fluidLine,
           '--- Registro por PK ---',
         ];
 
@@ -1752,10 +1859,11 @@
 
       function buildCsvText(m) {
         const pigName = getEffectivePigType(appState);
-        const header = ['Tipo_PIG', 'PK', 'Distancia_km', 'Hora_Pasaje', 'Dif_seg', 'Dif', 'TA_seg', 'TA', 'Vel_ms'].join(',');
+        const header = ['Tipo_PIG', 'Fluido', 'PK', 'Distancia_km', 'Hora_Pasaje', 'Dif_seg', 'Dif', 'TA_seg', 'TA', 'Vel_ms'].join(',');
         const body = m.rows.map((r) =>
           [
             `"${pigName.replace(/"/g, '""')}"`,
+            `"${appState.fluidMode === 'gas' ? 'Gas' : 'Liquido'}"`,
             `"${r.label}"`,
             r.distanceKm.toFixed(2),
             `"${r.timeStr || ''}"`,
@@ -1875,6 +1983,7 @@
             pigType: pigName,
             summary: {
               pigType: pigName,
+              fluidMode: appState.fluidMode,
               pctCarrera: m.pctCarrera,
               avgVelMs: m.avgVelMs,
               kmTotal: m.kmTotal,
@@ -1926,12 +2035,14 @@
           listEl.innerHTML = savedRuns
             .map((run) => {
               const runPig = run.pigType || (run.summary && run.summary.pigType) || getEffectivePigType(run.snapshot);
+              const runFluid = ((run.summary && run.summary.fluidMode) || (run.snapshot && run.snapshot.fluidMode)) === 'gas' ? 'Gas' : 'Líquido';
               return `
                 <div class="rounded-xl bg-track-bg border border-track-border p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                       <span class="text-sm font-extrabold text-white truncate">${escapeHtml(run.name)}</span>
                       <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/35">${escapeHtml(runPig)}</span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold ${runFluid === 'Gas' ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/35' : 'bg-sky-500/15 text-sky-300 border border-sky-500/35'}">${runFluid}</span>
                     </div>
                     <div class="text-xs text-slate-400 tabular-nums mt-0.5">
                       ${escapeHtml(run.savedAt)} · Lanz ${escapeHtml((run.summary && run.summary.launchTime) || '--:--')} · ${Number((run.summary && run.summary.pctCarrera) || 0).toFixed(1)}% · Vel ${
@@ -2023,6 +2134,26 @@
           document.querySelectorAll('.nav-tab-btn').forEach((btn) => {
             btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
           });
+
+          const btnModeLiquid = document.getElementById('btnModeLiquid');
+          if (btnModeLiquid) {
+            btnModeLiquid.addEventListener('click', () => {
+              appState.fluidMode = 'liquid';
+              persistState();
+              renderAll();
+              showToast('Modo fluido: Líquido', 'info');
+            });
+          }
+
+          const btnModeGas = document.getElementById('btnModeGas');
+          if (btnModeGas) {
+            btnModeGas.addEventListener('click', () => {
+              appState.fluidMode = 'gas';
+              persistState();
+              renderAll();
+              showToast('Modo fluido: Gas', 'info');
+            });
+          }
 
           const pigSelectEl = document.getElementById('headerPigTypeSelect');
           if (pigSelectEl) {
@@ -2257,10 +2388,12 @@
                 {
                   app: 'SCRAPER TRACK by Fran SaLou',
                   pigType: pigName,
+                  fluidMode: appState.fluidMode,
                   exportedAt: new Date().toISOString(),
                   state: appState,
                   kpis: {
                     pigType: pigName,
+                    fluidMode: appState.fluidMode,
                     mediaTiempo: formatDuration(m.avgDifSec),
                     mediaVelMs: m.avgVelMs,
                     tiempoCarrera: formatDuration(m.tiempoCarreraSec),
@@ -2272,6 +2405,7 @@
                     approxKm: m.approxKm,
                     gasVelMs: m.gasVelMs,
                     gasPressAdjVelMs: m.gasPressAdjVelMs,
+                    gasApproxKm: m.gasApproxKm,
                   },
                 },
                 null,
