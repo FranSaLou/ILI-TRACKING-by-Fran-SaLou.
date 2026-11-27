@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Scraper Track" />
-  <meta name="description" content="SCRAPER TRACK by Fran SaLou — PWA móvil para seguimiento de pasaje de scrapers, volúmenes de líquido y gas, gráfico de velocidad en m/s e historial." />
+  <meta name="description" content="SCRAPER TRACK by Fran SaLou — PWA móvil para seguimiento de pasaje de scrapers, volúmenes de líquido y gas con P, T y factor Z, gráfico de velocidad en m/s e historial." />
   <title>SCRAPER TRACK by Fran SaLou</title>
 
   <!-- Fuente Inter y Tailwind CSS -->
@@ -17,7 +17,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script>
-    // Configuración de tema oscuro industrial para Tailwind CSS
     try {
       tailwind.config = {
         darkMode: 'class',
@@ -47,7 +46,6 @@
   </script>
 
   <style>
-    /* Estilos base adaptables a celular, números tabulares y barra inferior segura */
     :root {
       color-scheme: dark;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -100,32 +98,25 @@
 </head>
 
 <body class="bg-track-bg text-slate-100 antialiased selection:bg-amber-400/30 selection:text-amber-200">
-  <!-- Contenedor principal de la aplicación (abre directo sin pantalla de presentación) -->
   <div id="appShell" class="min-h-dvh flex flex-col">
 
-    <!-- Encabezado superior fijo con título, ícono SVG ILI/MFL y selector desplegable de PIG -->
+    <!-- Encabezado superior fijo -->
     <header class="sticky top-0 z-30 bg-track-bg/95 backdrop-blur-md border-b border-track-border">
       <div class="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 space-y-2">
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2.5 min-w-0">
-            <!-- Ícono SVG de herramienta ILI / MFL -->
             <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-amber-400/20 via-amber-500/10 to-sky-500/15 border border-amber-400/40 flex items-center justify-center shrink-0 shadow-inner" aria-hidden="true">
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Copas traseras de arrastre -->
                 <path d="M5 10.5C7.2 14.5 7.2 21.5 5 25.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                 <path d="M8.5 11.5C10.5 15 10.5 21 8.5 24.5" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
-                <!-- Cuerpo central de la herramienta ILI/MFL -->
                 <rect x="10.5" y="13.5" width="15" height="9" rx="4" fill="#111827" stroke="currentColor" stroke-width="2.2" />
-                <!-- Bandas de sensores magnéticos MFL -->
                 <line x1="14.5" y1="14" x2="14.5" y2="22" stroke="#fbbf24" stroke-width="2" />
                 <line x1="18" y1="14" x2="18" y2="22" stroke="#10b981" stroke-width="2" />
                 <line x1="21.5" y1="14" x2="21.5" y2="22" stroke="#38bdf8" stroke-width="2" />
-                <!-- Nariz guía frontal -->
                 <path d="M25.5 14.5C29 15 31 16.5 31 18C31 19.5 29 21 25.5 21.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
               </svg>
             </div>
 
-            <!-- Título de la app -->
             <div class="min-w-0">
               <h1 class="text-sm sm:text-lg font-black tracking-tight text-white leading-tight truncate">
                 SCRAPER TRACK
@@ -139,7 +130,6 @@
             </div>
           </div>
 
-          <!-- Indicadores rápidos en el encabezado -->
           <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <div class="text-right bg-track-card border border-track-border rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5">
               <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-bold">Avance</div>
@@ -152,7 +142,6 @@
           </div>
         </div>
 
-        <!-- Fila dedicada para el selector desplegable de PIG y campo personalizado -->
         <div class="flex flex-wrap items-center gap-2">
           <label for="headerPigTypeSelect" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
             Tipo de PIG:
@@ -192,7 +181,6 @@
             </svg>
           </div>
 
-          <!-- Campo de texto adicional cuando se selecciona "Personalizado / Otro" -->
           <input
             id="headerCustomPigInput"
             type="text"
@@ -205,21 +193,18 @@
       </div>
     </header>
 
-    <!-- Aviso no bloqueante en pantalla -->
     <div id="toastBanner" role="status" aria-live="polite" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] pointer-events-none opacity-0 transition-all duration-200 -translate-y-2">
       <div id="toastInner" class="rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-xl border backdrop-blur-md flex items-center justify-between gap-2 bg-track-cardAlt border-amber-500/40 text-amber-200">
         <span id="toastMessage">Listo</span>
       </div>
     </div>
 
-    <!-- Contenido principal con las 4 vistas -->
     <main class="app-main flex-1 w-full max-w-5xl mx-auto px-3 sm:px-4 pt-4">
 
       <!-- ================================================================= -->
       <!-- VISTA 1: CARRERA                                                  -->
       <!-- ================================================================= -->
       <section id="tab-carrera" class="tab-panel space-y-4">
-        <!-- Configuración de tramo/km totales, paso entre PKs en metros y lanzamiento -->
         <div class="bg-track-card border border-track-border rounded-2xl p-3.5 sm:p-4 space-y-3">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
@@ -245,7 +230,6 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <!-- Hora de lanzamiento -->
             <div>
               <label for="inputLaunchTime" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 Hora de lanzamiento
@@ -267,7 +251,6 @@
               </div>
             </div>
 
-            <!-- Kilómetros totales -->
             <div>
               <label for="inputKmCarrera" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 Kilómetros totales (km)
@@ -281,7 +264,6 @@
               />
             </div>
 
-            <!-- Paso entre PK/tramos en metros -->
             <div>
               <label for="inputStepCarrera" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                 Paso entre PK (metros)
@@ -297,7 +279,6 @@
           </div>
         </div>
 
-        <!-- KPIs calculados en vivo -->
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
           <div class="bg-track-card border border-track-border rounded-2xl p-3">
             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Media tiempo</div>
@@ -335,7 +316,6 @@
           </div>
         </div>
 
-        <!-- Barra de avance -->
         <div class="bg-track-card border border-track-border rounded-2xl px-4 py-2.5 flex items-center gap-3">
           <span class="text-xs font-bold text-slate-300 shrink-0 tabular-nums">Progreso</span>
           <div class="flex-1 h-2.5 rounded-full bg-slate-800 overflow-hidden">
@@ -344,7 +324,6 @@
           <span id="carreraProgressText" class="text-xs font-extrabold text-amber-400 shrink-0 tabular-nums">0.0%</span>
         </div>
 
-        <!-- Lista / tabla de pasaje por PK -->
         <div class="bg-track-card border border-track-border rounded-2xl overflow-hidden">
           <div class="px-4 py-3 border-b border-track-border flex items-center justify-between">
             <div>
@@ -376,11 +355,10 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-track-border pb-3">
             <div>
               <h2 class="text-sm sm:text-base font-extrabold text-white">Parámetros de Ducto y Fluido</h2>
-              <p class="text-xs text-slate-400">Alterná entre corrida en líquido o gas para mostrar sus parámetros y cálculos específicos.</p>
+              <p class="text-xs text-slate-400">Alterná entre corrida en líquido o gas; en gas se aplican presión, temperatura (°C) y factor Z.</p>
             </div>
 
             <div class="flex items-center gap-2 self-start sm:self-auto">
-              <!-- Selector de fluido Líquido / Gas -->
               <div role="group" aria-label="Tipo de fluido de la corrida" class="inline-flex rounded-xl bg-track-bg p-1 border border-track-border">
                 <button
                   id="btnModeLiquid"
@@ -408,13 +386,12 @@
             </div>
           </div>
 
-          <!-- Parámetros geométricos y operativos del ducto -->
+          <!-- Geometría del ducto y tiempo -->
           <div class="space-y-2">
             <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Geometría del Ducto y Tiempo
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <!-- Diámetro nominal en pulgadas (4" a 36") -->
               <div>
                 <label for="paramInch" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   Diámetro (")
@@ -440,7 +417,6 @@
                 </select>
               </div>
 
-              <!-- Diámetro exterior en mm -->
               <div>
                 <label for="paramODmm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   Ø Exterior (mm)
@@ -448,7 +424,6 @@
                 <input id="paramODmm" type="number" step="0.005" min="10" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
               </div>
 
-              <!-- Espesor en mm -->
               <div>
                 <label for="paramWallMm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   Espesor (mm)
@@ -456,7 +431,6 @@
                 <input id="paramWallMm" type="number" step="0.1" min="0.5" class="w-full bg-track-bg border border-track-border focus:border-amber-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
               </div>
 
-              <!-- Hora actual -->
               <div>
                 <label for="paramCurrentTime" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   Hora actual
@@ -469,7 +443,6 @@
                 </div>
               </div>
 
-              <!-- Margen de error en km -->
               <div>
                 <label for="paramErrorKm" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   Margen error (± km)
@@ -495,14 +468,13 @@
             </div>
           </div>
 
-          <!-- Bloque exclusivo de parámetros de GAS -->
+          <!-- Bloque exclusivo de parámetros de GAS (con Temperatura °C y Factor Z) -->
           <div id="gasParamsSection" class="hidden pt-3 border-t border-track-border/80 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Parámetros de Flujo (Gas)</span>
-              <span class="text-[11px] text-slate-400">Corrida impulsada por gas</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Parámetros de Flujo (Gas · P, T y Z)</span>
+              <span class="text-[11px] text-slate-400">Base ref.: 1.01325 bar · 15 °C (288.15 K)</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <!-- Caudal de gas en m3/día -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label for="paramGasDay" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                   Caudal gas (m³/día)
@@ -510,12 +482,25 @@
                 <input id="paramGasDay" type="number" step="1000" min="0" class="w-full bg-track-bg border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-emerald-300 tabular-nums" />
               </div>
 
-              <!-- Presión -->
               <div>
                 <label for="paramPressure" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Presión operativa (bar)
+                  Presión op. (bar)
                 </label>
                 <input id="paramPressure" type="number" step="0.5" min="0" class="w-full bg-track-bg border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white tabular-nums" />
+              </div>
+
+              <div>
+                <label for="paramGasTempC" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Temperatura gas (°C)
+                </label>
+                <input id="paramGasTempC" type="number" step="0.5" min="-60" max="250" class="w-full bg-track-bg border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-sky-300 tabular-nums" />
+              </div>
+
+              <div>
+                <label for="paramGasZ" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                  Factor compresibilidad Z
+                </label>
+                <input id="paramGasZ" type="number" step="0.01" min="0.2" max="2.0" class="w-full bg-track-bg border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-amber-300 tabular-nums" />
               </div>
             </div>
           </div>
@@ -572,7 +557,7 @@
           <!-- Tarjeta Gas -->
           <div id="gasResultsCard" class="hidden bg-track-card border border-emerald-500/35 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-sm font-extrabold text-emerald-400 uppercase tracking-wider">Cálculo Gas</h3>
+              <h3 class="text-sm font-extrabold text-emerald-400 uppercase tracking-wider">Cálculo Gas (P · T · Z)</h3>
               <div class="flex items-center gap-2 text-xs font-bold tabular-nums">
                 <span id="volInnerDiamGas" class="text-slate-300">Ø int: 0.0000 m</span>
                 <span class="text-slate-600">·</span>
@@ -586,26 +571,26 @@
                 <div id="resGasM3h" class="text-base sm:text-lg font-extrabold text-white tabular-nums mt-0.5">0.0 m³/h</div>
               </div>
               <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
-                <div class="text-[11px] text-slate-400">Velocidad Gas</div>
-                <div id="resGasVelMs" class="text-base sm:text-lg font-extrabold text-emerald-400 tabular-nums mt-0.5">0.00 m/s</div>
+                <div class="text-[11px] text-slate-400">Vel. real (P, T, Z)</div>
+                <div id="resGasRealVelMs" class="text-base sm:text-lg font-extrabold text-emerald-400 tabular-nums mt-0.5">0.00 m/s</div>
               </div>
               <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
-                <div class="text-[11px] text-slate-400">Vol. Ajustado Presión</div>
+                <div class="text-[11px] text-slate-400">Vol. real acum. (P, T, Z)</div>
                 <div id="resGasPressAdjM3" class="text-base sm:text-lg font-extrabold text-sky-300 tabular-nums mt-0.5">0 m³</div>
               </div>
               <div class="bg-track-bg/90 border border-track-border/80 rounded-xl p-3">
-                <div class="text-[11px] text-slate-400">Tiempo Recorrido Gas</div>
+                <div class="text-[11px] text-slate-400">Tiempo Recorrido (P, T, Z)</div>
                 <div id="resGasPumpTime" class="text-base sm:text-lg font-extrabold text-amber-400 tabular-nums mt-0.5">--:--</div>
               </div>
             </div>
 
             <div class="bg-track-cardAlt border border-emerald-500/25 rounded-xl p-3 space-y-1.5 text-xs">
               <div class="flex items-center justify-between">
-                <span class="text-slate-300 font-semibold">Vel. gas aj. presión (base→línea):</span>
-                <span id="resGasPressAdjVelMs" class="text-sm font-extrabold text-emerald-300 tabular-nums">0.00 m/s</span>
+                <span class="text-slate-300 font-semibold">Vel. superficial (caudal ing.):</span>
+                <span id="resGasVelMs" class="text-sm font-extrabold text-emerald-300 tabular-nums">0.00 m/s</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-300 font-semibold">Posición aprox. (flujo gas):</span>
+                <span class="text-slate-300 font-semibold">Posición aprox. (flujo P, T, Z):</span>
                 <span id="resGasApproxKm" class="font-bold text-amber-400 tabular-nums">0.00 km</span>
               </div>
               <div class="flex items-center justify-between">
@@ -613,7 +598,7 @@
                 <span id="resGasErrorRangeKm" class="font-bold text-slate-200 tabular-nums">0.00 km – 0.00 km</span>
               </div>
               <div class="flex items-center justify-between pt-1 border-t border-track-border/70">
-                <span class="text-slate-300 font-semibold">Volumen gas acumulado:</span>
+                <span class="text-slate-300 font-semibold">Volumen gas acumulado (ing.):</span>
                 <span id="resGasTranspM3" class="font-bold text-white tabular-nums">0 m³</span>
               </div>
               <div class="flex items-center justify-between">
@@ -621,8 +606,8 @@
                 <span id="resInnerAreaM2" class="font-bold text-slate-200 tabular-nums">0.0000 m²</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-400">Presión operativa:</span>
-                <span id="resPressureEcho" class="font-bold text-emerald-300 tabular-nums">84 bar</span>
+                <span class="text-slate-400">Condiciones P · T · Z:</span>
+                <span id="resPressureEcho" class="font-bold text-emerald-300 tabular-nums">84 bar · 20.0 °C · Z=0.90</span>
               </div>
             </div>
           </div>
@@ -662,7 +647,6 @@
             </div>
           </div>
 
-          <!-- Inspección del punto seleccionado -->
           <div id="chartPointInspector" class="bg-track-cardAlt border border-amber-500/35 rounded-2xl p-3.5 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Tramo</div>
@@ -682,7 +666,6 @@
             </div>
           </div>
 
-          <!-- Lienzo SVG interactivo -->
           <div class="w-full bg-track-bg border border-track-border/90 rounded-2xl p-2 sm:p-3 overflow-hidden">
             <svg
               id="velocityChartSvg"
@@ -693,7 +676,6 @@
             ></svg>
           </div>
 
-          <!-- Tabla resumen de tramos -->
           <div class="border border-track-border rounded-2xl overflow-hidden">
             <div class="px-3.5 py-2.5 bg-track-cardAlt/80 border-b border-track-border flex items-center justify-between">
               <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Tramos Registrados</span>
@@ -798,7 +780,6 @@
       </section>
     </main>
 
-    <!-- Barra inferior con las 4 vistas -->
     <nav aria-label="Navegación principal" class="bottom-nav fixed bottom-0 inset-x-0 z-40 bg-track-card/95 backdrop-blur-md border-t border-track-border">
       <div class="max-w-5xl mx-auto grid grid-cols-4 gap-1 px-2 pt-1.5">
         <button
@@ -857,9 +838,6 @@
     (function () {
       'use strict';
 
-      // =====================================================================
-      // 1. TABLA DE DIÁMETROS EXTERIORES ESTÁNDAR (4" a 36" -> mm)
-      // =====================================================================
       const INCH_TO_OD_MM = {
         4: 114.3,
         6: 168.275,
@@ -899,7 +877,6 @@
       const STORAGE_KEY_STATE = 'scraper_track_fran_salou_state_v1';
       const STORAGE_KEY_HISTORY = 'scraper_track_fran_salou_history_v1';
 
-      // Respaldo seguro en memoria cuando localStorage está restringido o lanza excepción
       const memoryStore = new Map();
       let usingMemoryFallback = false;
 
@@ -927,9 +904,6 @@
         return false;
       }
 
-      // =====================================================================
-      // 2. ESTADO INICIAL POR DEFECTO
-      // =====================================================================
       function createDefaultState() {
         return {
           activeTab: 'carrera',
@@ -945,6 +919,8 @@
           liquidM3h: 64,
           gasDay: 900000,
           pressure: 84,
+          gasTempC: 20,
+          gasZ: 0.90,
           currentTime: '09:10',
           errorKm: 1.5,
           pkTimes: {
@@ -1005,9 +981,6 @@
         }
       }
 
-      // =====================================================================
-      // 3. UTILIDADES DE HORA Y DIFERENCIA SEGURA ANTE CRUCE DE MEDIANOCHE
-      // =====================================================================
       function parseTimeToSeconds(timeStr) {
         try {
           if (!timeStr || typeof timeStr !== 'string') return null;
@@ -1070,9 +1043,6 @@
         return s > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}`;
       }
 
-      // =====================================================================
-      // 4. CÁLCULOS EN TIEMPO REAL DE CARRERA, LÍQUIDO Y GAS
-      // =====================================================================
       function computeMetrics() {
         try {
           const kmTotal = Math.max(0.1, Number(appState.kmTotal) || 15.6);
@@ -1196,7 +1166,6 @@
             horaLlegadaSec = launchSec + tiempoCarreraSec;
           }
 
-          // Cálculos geométricos y volumétricos de líquido
           const odMm = Math.max(1, Number(appState.odMm) || 219.075);
           const wallMm = Math.max(0, Number(appState.wallMm) || 0);
           const dInM = Math.max(0.01, (odMm - 2 * wallMm) / 1000);
@@ -1224,18 +1193,33 @@
           const avgKmh = capPerKm > 0 ? liquidM3h / capPerKm : 0;
           const hydVelMs = avgKmh / 3.6;
 
-          // Cálculos de gas y velocidad de desplazamiento en m/s
+          // Cálculo de gas con Presión (bar), Temperatura (°C) y Factor de compresibilidad Z
+          // Condiciones base de referencia: P_base = 1.01325 bar, T_base = 15 °C (288.15 K)
+          const P_BASE = 1.01325;
+          const T_BASE_K = 288.15;
+
           const gasDay = Math.max(0, Number(appState.gasDay) || 0);
           const pressure = Math.max(0, Number(appState.pressure) || 0);
+          const gasTempC = Number.isFinite(Number(appState.gasTempC)) ? Number(appState.gasTempC) : 20;
+          const gasZ = Math.max(0.1, Number(appState.gasZ) || 0.90);
+
+          const absPressureBar = pressure + P_BASE;
+          const tempK = Math.max(50, gasTempC + 273.15);
+
+          // Factor de conversión de caudal base a condiciones reales en línea (P, T, Z)
+          const realLineFactor = (P_BASE / absPressureBar) * (tempK / T_BASE_K) * gasZ;
+
           const gasM3h = gasDay / 24;
-          const gasM3s = gasM3h / 3600;
-          const gasVelMs = innerAreaM2 > 0 ? gasM3s / innerAreaM2 : 0;
+          const gasVelMs = innerAreaM2 > 0 ? (gasM3h / 3600) / innerAreaM2 : 0;
+
+          const gasRealM3h = gasM3h * realLineFactor;
+          const gasRealVelMs = innerAreaM2 > 0 ? (gasRealM3h / 3600) / innerAreaM2 : 0;
+
           const gasTranspM3 = gasM3h * elapsedHours;
-          const pressureFactor = Math.max(1, (pressure + 1.01325) / 1.01325);
-          const gasPressAdjM3 = gasTranspM3 / pressureFactor;
-          const gasPressAdjVelMs = gasVelMs / pressureFactor;
-          const gasPumpTimeSec = gasVelMs > 0 ? totalMeters / gasVelMs : null;
-          const gasApproxKm = Math.min(kmTotal, (gasVelMs * elapsedHours * 3600) / 1000);
+          const gasPressAdjM3 = gasRealM3h * elapsedHours;
+
+          const gasPumpTimeSec = gasRealVelMs > 0 ? totalMeters / gasRealVelMs : null;
+          const gasApproxKm = Math.min(kmTotal, (gasRealVelMs * elapsedHours * 3600) / 1000);
           const gasMinKm = Math.max(0, gasApproxKm - errorKm);
           const gasMaxKm = Math.min(kmTotal, gasApproxKm + errorKm);
 
@@ -1268,11 +1252,15 @@
             hydVelMs,
             gasDay,
             pressure,
+            gasTempC,
+            gasZ,
+            realLineFactor,
             gasM3h,
             gasVelMs,
+            gasRealM3h,
+            gasRealVelMs,
             gasTranspM3,
             gasPressAdjM3,
-            gasPressAdjVelMs,
             gasPumpTimeSec,
             gasApproxKm,
             gasMinKm,
@@ -1308,11 +1296,15 @@
             hydVelMs: 0.53,
             gasDay: 900000,
             pressure: 84,
+            gasTempC: 20,
+            gasZ: 0.90,
+            realLineFactor: 0.011,
             gasM3h: 37500,
-            gasVelMs: 0,
+            gasVelMs: 311.8,
+            gasRealM3h: 412.5,
+            gasRealVelMs: 3.43,
             gasTranspM3: 0,
             gasPressAdjM3: 0,
-            gasPressAdjVelMs: 0,
             gasPumpTimeSec: null,
             gasApproxKm: 0,
             gasMinKm: 0,
@@ -1321,9 +1313,6 @@
         }
       }
 
-      // =====================================================================
-      // 5. RENDERIZADO DE VISTAS
-      // =====================================================================
       function switchTab(tabName) {
         try {
           const valid = ['carrera', 'volumenes', 'grafico', 'historial'];
@@ -1543,6 +1532,8 @@
           setValIfIdle('paramLiquidM3h', appState.liquidM3h);
           setValIfIdle('paramGasDay', appState.gasDay);
           setValIfIdle('paramPressure', appState.pressure);
+          setValIfIdle('paramGasTempC', appState.gasTempC);
+          setValIfIdle('paramGasZ', appState.gasZ);
           setValIfIdle('paramCurrentTime', appState.currentTime);
           setValIfIdle('paramErrorKm', appState.errorKm);
 
@@ -1563,26 +1554,24 @@
           document.getElementById('resGasM3hBadge').textContent = `${m.gasM3h.toFixed(1)} m³/h`;
           document.getElementById('resGasM3h').textContent =
             `${m.gasM3h.toLocaleString('es-AR', { maximumFractionDigits: 1 })} m³/h`;
-          document.getElementById('resGasVelMs').textContent = `${m.gasVelMs.toFixed(2)} m/s`;
+          document.getElementById('resGasRealVelMs').textContent = `${m.gasRealVelMs.toFixed(2)} m/s`;
           document.getElementById('resGasPressAdjM3').textContent =
             `${Math.round(m.gasPressAdjM3).toLocaleString('es-AR')} m³`;
           document.getElementById('resGasPumpTime').textContent = formatDuration(m.gasPumpTimeSec);
-          document.getElementById('resGasPressAdjVelMs').textContent = `${m.gasPressAdjVelMs.toFixed(2)} m/s`;
+          document.getElementById('resGasVelMs').textContent = `${m.gasVelMs.toFixed(2)} m/s`;
           document.getElementById('resGasApproxKm').textContent = `${m.gasApproxKm.toFixed(2)} km`;
           document.getElementById('resGasErrorRangeKm').textContent =
             `${m.gasMinKm.toFixed(2)} km – ${m.gasMaxKm.toFixed(2)} km`;
           document.getElementById('resGasTranspM3').textContent =
             `${Math.round(m.gasTranspM3).toLocaleString('es-AR')} m³`;
           document.getElementById('resInnerAreaM2').textContent = `${m.innerAreaM2.toFixed(4)} m²`;
-          document.getElementById('resPressureEcho').textContent = `${m.pressure} bar`;
+          document.getElementById('resPressureEcho').textContent =
+            `${m.pressure} bar · ${m.gasTempC.toFixed(1)} °C · Z=${m.gasZ.toFixed(2)}`;
         } catch (_err) {
           // Ignorar error de renderizado parcial
         }
       }
 
-      // =====================================================================
-      // 6. GRÁFICO SVG PUNTO A PUNTO DE VELOCIDAD (m/s)
-      // =====================================================================
       function renderChartView(m) {
         try {
           const svg = document.getElementById('velocityChartSvg');
@@ -1591,8 +1580,8 @@
           if (!svg || !tableBody) return;
 
           const isGas = appState.fluidMode === 'gas';
-          const refVelMs = isGas ? m.gasVelMs : m.hydVelMs;
-          const refLabel = isGas ? 'Gas' : 'Líquido';
+          const refVelMs = isGas ? m.gasRealVelMs : m.hydVelMs;
+          const refLabel = isGas ? 'Gas (P,T,Z)' : 'Líquido';
 
           const btnAvg = document.getElementById('btnToggleAvgLine');
           const btnHyd = document.getElementById('btnToggleHydLine');
@@ -1826,21 +1815,18 @@
         }
       }
 
-      // =====================================================================
-      // 7. HISTORIAL, PERSISTENCIA Y EXPORTACIÓN (RESUMEN, CSV, JSON)
-      // =====================================================================
       function buildSummaryText(m) {
         const pigName = getEffectivePigType(appState);
         const isGas = appState.fluidMode === 'gas';
         const fluidLine = isGas
-          ? `Fluido: Gas | ${m.gasDay.toLocaleString('es-AR')} m³/día (${m.gasM3h.toFixed(1)} m³/h · Vel: ${m.gasVelMs.toFixed(2)} m/s · Aj. presión: ${m.gasPressAdjVelMs.toFixed(2)} m/s)`
+          ? `Fluido: Gas | ${m.gasDay.toLocaleString('es-AR')} m³/día (${m.gasM3h.toFixed(1)} m³/h · Vel. real P,T,Z: ${m.gasRealVelMs.toFixed(2)} m/s · Sup.: ${m.gasVelMs.toFixed(2)} m/s)`
           : `Fluido: Líquido | ${m.liquidM3h} m³/h | Cap. total: ${m.totalCapM3.toFixed(2)} m³ | Pos. aprox.: ${m.approxKm.toFixed(2)} km (±${appState.errorKm} km)`;
 
         const lines = [
           `SCRAPER TRACK by Fran SaLou`,
           `Tipo de PIG / Equipo: ${pigName}`,
           `Lanzamiento: ${appState.launchTime || '--:--'} | Longitud: ${m.kmTotal.toFixed(1)} km | Paso: ${m.stepMeters} m`,
-          `Ducto: ${appState.inchNominal}" (Ø ext ${appState.odMm} mm, esp ${appState.wallMm} mm)${isGas ? ` | Presión: ${m.pressure} bar` : ''}`,
+          `Ducto: ${appState.inchNominal}" (Ø ext ${appState.odMm} mm, esp ${appState.wallMm} mm)${isGas ? ` | P: ${m.pressure} bar · T: ${m.gasTempC.toFixed(1)} °C · Z: ${m.gasZ.toFixed(2)}` : ''}`,
           `Media tiempo: ${formatDuration(m.avgDifSec)} | Media vel: ${
             m.avgVelMs !== null ? m.avgVelMs.toFixed(2) + ' m/s' : '--'
           } | % Carrera: ${m.pctCarrera.toFixed(1)}% | Llegada est.: ${formatClockFromSeconds(m.horaLlegadaSec)}`,
@@ -2126,9 +2112,6 @@
         }
       }
 
-      // =====================================================================
-      // 8. ENLACE DE EVENTOS Y SOPORTE PWA SEGURO
-      // =====================================================================
       function bindEvents() {
         try {
           document.querySelectorAll('.nav-tab-btn').forEach((btn) => {
@@ -2151,7 +2134,7 @@
               appState.fluidMode = 'gas';
               persistState();
               renderAll();
-              showToast('Modo fluido: Gas', 'info');
+              showToast('Modo fluido: Gas (P, T, Z)', 'info');
             });
           }
 
@@ -2210,11 +2193,13 @@
             });
           }
 
-          const bindNum = (id, key, minVal, fallbackVal) => {
+          const bindNum = (id, key, minVal, fallbackVal, allowNegative = false) => {
             const el = document.getElementById(id);
             if (!el) return;
             el.addEventListener('input', () => {
-              const n = Number(el.value);
+              const raw = el.value;
+              if (allowNegative && (raw === '' || raw === '-')) return;
+              const n = Number(raw);
               appState[key] = Number.isFinite(n) && n >= minVal ? n : fallbackVal;
               persistState();
               renderAll();
@@ -2228,6 +2213,8 @@
           bindNum('paramLiquidM3h', 'liquidM3h', 0, 64);
           bindNum('paramGasDay', 'gasDay', 0, 900000);
           bindNum('paramPressure', 'pressure', 0, 84);
+          bindNum('paramGasTempC', 'gasTempC', -60, 20, true);
+          bindNum('paramGasZ', 'gasZ', 0.1, 0.90);
           bindNum('paramErrorKm', 'errorKm', 0, 1.5);
 
           const passContainer = document.getElementById('passRowsContainer');
@@ -2325,6 +2312,8 @@
               appState.liquidM3h = def.liquidM3h;
               appState.gasDay = def.gasDay;
               appState.pressure = def.pressure;
+              appState.gasTempC = def.gasTempC;
+              appState.gasZ = def.gasZ;
               appState.currentTime = def.currentTime;
               appState.errorKm = def.errorKm;
               persistState();
@@ -2404,7 +2393,9 @@
                     totalCapM3: m.totalCapM3,
                     approxKm: m.approxKm,
                     gasVelMs: m.gasVelMs,
-                    gasPressAdjVelMs: m.gasPressAdjVelMs,
+                    gasRealVelMs: m.gasRealVelMs,
+                    gasTempC: m.gasTempC,
+                    gasZ: m.gasZ,
                     gasApproxKm: m.gasApproxKm,
                   },
                 },
